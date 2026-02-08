@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --primary: #2c3e50; --accent: #e67e22; --bg: #f4f4f4; }
+    body { font-family: 'Montserrat', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+    
+    /* LOGIN */
+    #login-view { max-width: 300px; margin: 100px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; }
+    input, select, button { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+    button { background: var(--primary); color: white; border: none; cursor: pointer; font-weight: bold; }
+    button:hover { opacity: 0.9; }
+    
+    /* APP */
+    .hidden { display: none !important; }
+    .card { background: white; padding: 20px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .status-badge { padding: 5px 10px; border-radius: 20px; font-size: 0.8em; color: white; }
+    .status-Recibido { background: #95a5a6; }
+    .status-Proceso { background: #3498db; }
+    .status-Listo { background: #2ecc71; }
+    
+    /* CRONOMETRO */
+    #timer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; }
+    #timer-display { font-size: 5em; font-weight: bold; font-variant-numeric: tabular-nums; }
+    .timer-controls button { width: auto; margin: 10px; padding: 15px 40px; font-size: 1.2em; }
+    .btn-stop { background: #e74c3c; }
+    .btn-pause { background: #f1c40f; color: black; }
+    
+    /* FAB */
+    .fab { position: fixed; bottom: 30px; right: 30px; background: var(--accent); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <div id="login-view">
+    <h2>Luthier v1.0</h2>
+    <input type="text" id="user" placeholder="Usuario">
+    <input type="password" id="pass" placeholder="Contraseña">
+    <button onclick="doLogin()">ENTRAR</button>
+    <p id="login-msg" style="color:red; font-size:0.8em;"></p>
+  </div>
+
+  <div id="app-view" class="hidden">
+    <div class="header">
+      <h3 id="welcome-msg">Hola, Luthier</h3>
+      <button onclick="logout()" style="width:auto; background:#e74c3c; font-size:0.8em;">Salir</button>
+    </div>
+
+    <input type="text" id="search" placeholder="🔍 Buscar por Serie o Cliente..." onkeyup="buscar(this.value)">
+
+    <div id="results-container"></div>
+    
+    <div class="fab" onclick="mostrarNuevoIngreso()">+</div>
+  </div>
+
+  <div id="new-view" class="hidden">
+    <div class="card">
+      <h3>Nuevo Ingreso</h3>
+      <input type="text" id="new-cliente" placeholder="Nombre Cliente o Banda" list="clientes-list">
+      <datalist id="clientes-list"></datalist>
+      <input type="text" id="new-inst" placeholder="Instrumento (ej. Saxo Alto)">
+      <input type="text" id="new-marca" placeholder="Marca">
+      <input type="text" id="new-serie" placeholder="Número de Serie">
+      <textarea id="new-diag" rows="3" style="width:100%; border:1px solid #ddd;" placeholder="Diagnóstico inicial..."></textarea>
+      
+      <div style="display:flex; gap:10px; margin-top:10px;">
+        <button onclick="guardarTicket()" style="background:var(--accent)">GUARDAR</button>
+        <button onclick="volverInicio()" style="background:#95a5a6">CANCELAR</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="timer-overlay" class="hidden">
+    <div>TRABAJANDO EN TICKET #<span id="timer-ticket"></span></div>
+    <div id="timer-display">00:00:00</div>
+    <div class="timer-controls">
+      <button class="btn-pause" onclick="pausarTimer()">PAUSAR</button>
+      <button class="btn-stop" onclick="detenerTimer()">TERMINAR</button>
+    </div>
+  </div>
+
+  <script>
+    let userSession = null;
+    let seconds = 0;
+    let timerInterval = null;
+    let currentTicket = null;
+
+    // --- LOGIN ---
+    function doLogin() {
+      const u = document.getElementById('user').value;
+      const p = document.getElementById('pass').value;
+      google.script.run.withSuccessHandler(res => {
+        if(res.success) {
+          userSession = res;
+          document.getElementById('login-view').classList.add('hidden');
+          document.getElementById('app-view').classList.remove('hidden');
+          document.getElementById('welcome-msg').innerText = `Hola, ${res.nombre}`;
+          buscar(''); // Cargar historial
+        } else {
+          document.getElementById('login-msg').innerText = "Credenciales incorrectas";
+        }
+      }).validarLogin(u, p);
+    }
+
+    // --- BUSCADOR ---
+    function buscar(q) {
+      if(q.length < 1 && q !== '') return;
+      google.script.run.withSuccessHandler(renderTickets).obtenerHistorial(q);
+    }
+
+    function renderTickets(tickets) {
+      const div = document.getElementById('results-container');
+      div.innerHTML = '';
+      tickets.forEach(t => {
+        const bg = t.estado === 'Recibido' ? '#95a5a6' : (t.estado === 'Listo' ? '#2ecc71' : '#3498db');
+        
+        let actions = `<button onclick="iniciarTrabajo('${t.ticket}')" style="margin-top:10px;">⏱️ TRABAJAR</button>`;
+        if(t.estado === 'Listo') {
+          const msg = `Hola ${t.cliente}, tu ${t.instrumento} (${t.serie}) está listo. Coordinemos la entrega.`;
+          actions = `<button onclick="window.open('https://wa.me/?text=${encodeURIComponent(msg)}')" style="background:#25D366; margin-top:10px;">📱 AVISAR WHATSAPP</button>`;
+        }
+
+        div.innerHTML += `
+          <div class="card">
+            <div class="header" style="margin-bottom:5px;">
+              <b>#${t.ticket}</b>
+              <span class="status-badge" style="background:${bg}">${t.estado}</span>
+            </div>
+            <div style="font-size:1.1em; font-weight:bold;">${t.instrumento} - ${t.marca}</div>
+            <div style="color:#7f8c8d; font-size:0.9em;">Serie: ${t.serie}</div>
+            <div style="margin-top:5px;">Cliente: ${t.cliente}</div>
+            <div style="margin-top:10px; font-size:0.9em; font-style:italic;">"${t.diagnostico}"</div>
+            ${actions}
+          </div>
+        `;
+      });
+    }
+
+    // --- NUEVO INGRESO ---
+    function mostrarNuevoIngreso() {
+      document.getElementById('app-view').classList.add('hidden');
+      document.getElementById('new-view').classList.remove('hidden');
+      // Precargar clientes para autocompletado
+      google.script.run.withSuccessHandler(res => {
+        const list = document.getElementById('clientes-list');
+        list.innerHTML = '';
+        res.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c.nombre;
+          list.appendChild(opt);
+        });
+      }).buscarClientes('');
+    }
+
+    function guardarTicket() {
+      const datos = {
+        cliente: document.getElementById('new-cliente').value,
+        instrumento: document.getElementById('new-inst').value,
+        marca: document.getElementById('new-marca').value,
+        serie: document.getElementById('new-serie').value,
+        diagnostico: document.getElementById('new-diag').value
+      };
+      google.script.run.withSuccessHandler(() => {
+        volverInicio();
+        buscar('');
+      }).guardarIngreso(datos);
+    }
+
+    function volverInicio() {
+      document.getElementById('new-view').classList.add('hidden');
+      document.getElementById('app-view').classList.remove('hidden');
+    }
+
+    // --- CRONOMETRO ---
+    function iniciarTrabajo(ticketId) {
+      currentTicket = ticketId;
+      document.getElementById('timer-ticket').innerText = ticketId;
+      document.getElementById('timer-overlay').classList.remove('hidden');
+      seconds = 0;
+      timerInterval = setInterval(() => {
+        seconds++;
+        const date = new Date(0);
+        date.setSeconds(seconds);
+        document.getElementById('timer-display').innerText = date.toISOString().substr(11, 8);
+      }, 1000);
+      
+      // Actualizar estado a "En Proceso"
+      google.script.run.actualizarEstado(ticketId, "En Proceso");
+    }
+
+    function pausarTimer() {
+      // Solo oculta visualmente, pero aquí podrías guardar el parcial
+      alert("Pausado. (Lógica de pausa simple para v1.0)");
+    }
+
+    function detenerTimer() {
+      clearInterval(timerInterval);
+      document.getElementById('timer-overlay').classList.add('hidden');
+      const tiempoFinal = document.getElementById('timer-display').innerText;
+      
+      const terminar = confirm("¿Trabajo terminado? Aceptar para marcar como LISTO, Cancelar para seguir luego.");
+      const estado = terminar ? "Listo" : "En Proceso";
+      
+      google.script.run.withSuccessHandler(() => {
+        buscar('');
+      }).actualizarEstado(currentTicket, estado, tiempoFinal);
+    }
+  </script>
+</body>
+</html>
+
