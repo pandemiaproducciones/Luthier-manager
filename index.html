@@ -2,84 +2,225 @@
 <html>
 <head>
   <base target="_top">
+  <title>Luthier Manager v1.0</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+  
+  <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/125/125078.png">
+
   <style>
-    :root { --primary: #2c3e50; --accent: #e67e22; --bg: #f4f4f4; }
-    body { font-family: 'Montserrat', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+    :root { 
+      --primary: #2c3e50; 
+      --accent: #e67e22; 
+      --bg: #f4f4f4; 
+      --text: #333;
+    }
     
-    /* LOGIN */
-    #login-view { max-width: 300px; margin: 100px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; }
-    input, select, button { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-    button { background: var(--primary); color: white; border: none; cursor: pointer; font-weight: bold; }
+    body { 
+      font-family: 'Montserrat', sans-serif; 
+      background: var(--bg); 
+      color: var(--text);
+      margin: 0; 
+      padding: 20px; 
+    }
+    
+    /* LOGIN STYLE */
+    #login-view { 
+      max-width: 320px; 
+      margin: 80px auto; 
+      background: white; 
+      padding: 40px 30px; 
+      border-radius: 12px; 
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+      text-align: center; 
+    }
+    
+    h2, h3 { margin-top: 0; color: var(--primary); }
+    
+    input, select, textarea { 
+      width: 100%; 
+      padding: 14px; 
+      margin: 8px 0; 
+      border: 1px solid #ddd; 
+      border-radius: 8px; 
+      box-sizing: border-box; 
+      font-family: 'Montserrat', sans-serif;
+      font-size: 16px; /* Evita zoom en iPhone */
+    }
+    
+    button { 
+      width: 100%; 
+      padding: 14px; 
+      background: var(--primary); 
+      color: white; 
+      border: none; 
+      border-radius: 8px;
+      cursor: pointer; 
+      font-weight: bold; 
+      font-size: 14px;
+      transition: opacity 0.3s;
+      margin-top: 10px;
+    }
+    
     button:hover { opacity: 0.9; }
     
-    /* APP */
+    /* APP LAYOUT */
     .hidden { display: none !important; }
-    .card { background: white; padding: 20px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .status-badge { padding: 5px 10px; border-radius: 20px; font-size: 0.8em; color: white; }
-    .status-Recibido { background: #95a5a6; }
-    .status-Proceso { background: #3498db; }
-    .status-Listo { background: #2ecc71; }
     
-    /* CRONOMETRO */
-    #timer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; }
-    #timer-display { font-size: 5em; font-weight: bold; font-variant-numeric: tabular-nums; }
-    .timer-controls button { width: auto; margin: 10px; padding: 15px 40px; font-size: 1.2em; }
-    .btn-stop { background: #e74c3c; }
-    .btn-pause { background: #f1c40f; color: black; }
+    .card { 
+      background: white; 
+      padding: 20px; 
+      border-radius: 12px; 
+      margin-bottom: 15px; 
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+      border-left: 5px solid var(--primary);
+    }
     
-    /* FAB */
-    .fab { position: fixed; bottom: 30px; right: 30px; background: var(--accent); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; }
+    .header-bar { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 25px; 
+    }
+    
+    /* BADGES DE ESTADO */
+    .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75em; color: white; font-weight: bold; text-transform: uppercase; }
+    .status-Recibido { background: #95a5a6; } /* Gris */
+    .status-Proceso { background: #3498db; } /* Azul */
+    .status-Listo { background: #2ecc71; } /* Verde */
+    .status-Entregado { background: #2c3e50; } /* Oscuro */
+    
+    /* CRONÓMETRO GIGANTE */
+    #timer-overlay { 
+      position: fixed; 
+      top: 0; left: 0; 
+      width: 100%; height: 100%; 
+      background: rgba(44, 62, 80, 0.98); 
+      z-index: 2000; 
+      display: flex; 
+      flex-direction: column; 
+      justify-content: center; 
+      align-items: center; 
+      color: white; 
+    }
+    
+    #timer-display { 
+      font-size: 18vw; /* Gigante y responsivo */
+      font-weight: 700; 
+      font-variant-numeric: tabular-nums; 
+      line-height: 1;
+      margin: 20px 0;
+    }
+    
+    .timer-controls { display: flex; gap: 20px; }
+    .timer-controls button { 
+      width: auto; 
+      padding: 15px 30px; 
+      font-size: 1.2em; 
+      border-radius: 50px;
+    }
+    .btn-stop { background: #e74c3c; } /* Rojo */
+    .btn-pause { background: #f1c40f; color: #2c3e50; } /* Amarillo */
+
+    /* BOTÓN FLOTANTE (FAB) */
+    .fab { 
+      position: fixed; 
+      bottom: 25px; 
+      right: 25px; 
+      background: var(--accent); 
+      color: white; 
+      width: 60px; height: 60px; 
+      border-radius: 50%; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      font-size: 30px; 
+      box-shadow: 0 5px 15px rgba(230, 126, 34, 0.4); 
+      cursor: pointer; 
+      z-index: 100;
+      transition: transform 0.2s;
+    }
+    .fab:active { transform: scale(0.9); }
+
   </style>
 </head>
 <body>
 
   <div id="login-view">
-    <h2>Luthier v1.0</h2>
+    <div style="font-size: 3em; margin-bottom: 10px;">🎷</div>
+    <h2>Luthier Manager v1.0</h2>
     <input type="text" id="user" placeholder="Usuario">
     <input type="password" id="pass" placeholder="Contraseña">
-    <button onclick="doLogin()">ENTRAR</button>
-    <p id="login-msg" style="color:red; font-size:0.8em;"></p>
+    <button onclick="doLogin()">INGRESAR AL TALLER</button>
+    <p id="login-msg" style="color:#e74c3c; font-size:0.9em; margin-top:10px;"></p>
   </div>
 
   <div id="app-view" class="hidden">
-    <div class="header">
-      <h3 id="welcome-msg">Hola, Luthier</h3>
-      <button onclick="logout()" style="width:auto; background:#e74c3c; font-size:0.8em;">Salir</button>
+    <div class="header-bar">
+      <div>
+        <h3 id="welcome-msg" style="margin:0;">Hola, Luthier</h3>
+        <small style="color:#7f8c8d;">Panel de Control</small>
+      </div>
+      <button onclick="logout()" style="width:auto; background:transparent; color:#e74c3c; border:1px solid #e74c3c; padding:8px 15px;">Salir</button>
     </div>
 
-    <input type="text" id="search" placeholder="🔍 Buscar por Serie o Cliente..." onkeyup="buscar(this.value)">
+    <div style="position: sticky; top: 0; background: var(--bg); padding: 10px 0; z-index: 10;">
+      <input type="text" id="search" placeholder="🔍 Buscar Serie, Cliente o Instrumento..." onkeyup="buscar(this.value)" style="box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+    </div>
 
-    <div id="results-container"></div>
+    <div id="results-container" style="padding-bottom: 80px;">
+      <div style="text-align:center; color:#95a5a6; margin-top:50px;">
+        Usa el buscador o el botón + para empezar.
+      </div>
+    </div>
     
     <div class="fab" onclick="mostrarNuevoIngreso()">+</div>
   </div>
 
   <div id="new-view" class="hidden">
-    <div class="card">
-      <h3>Nuevo Ingreso</h3>
-      <input type="text" id="new-cliente" placeholder="Nombre Cliente o Banda" list="clientes-list">
-      <datalist id="clientes-list"></datalist>
-      <input type="text" id="new-inst" placeholder="Instrumento (ej. Saxo Alto)">
-      <input type="text" id="new-marca" placeholder="Marca">
-      <input type="text" id="new-serie" placeholder="Número de Serie">
-      <textarea id="new-diag" rows="3" style="width:100%; border:1px solid #ddd;" placeholder="Diagnóstico inicial..."></textarea>
+    <div class="card" style="border-left:none;">
+      <h3>🎻 Nuevo Ingreso</h3>
       
-      <div style="display:flex; gap:10px; margin-top:10px;">
-        <button onclick="guardarTicket()" style="background:var(--accent)">GUARDAR</button>
+      <label style="font-size:0.8em; color:#7f8c8d;">Cliente</label>
+      <input type="text" id="new-cliente" placeholder="Nombre o Banda" list="clientes-list">
+      <datalist id="clientes-list"></datalist>
+      
+      <div style="display:flex; gap:10px;">
+        <div style="flex:1;">
+          <label style="font-size:0.8em; color:#7f8c8d;">Instrumento</label>
+          <input type="text" id="new-inst" placeholder="Ej. Saxo Alto">
+        </div>
+        <div style="flex:1;">
+           <label style="font-size:0.8em; color:#7f8c8d;">Marca</label>
+           <input type="text" id="new-marca" placeholder="Ej. Yamaha">
+        </div>
+      </div>
+
+      <label style="font-size:0.8em; color:#7f8c8d;">Número de Serie (Clave)</label>
+      <input type="text" id="new-serie" placeholder="Ej. YAS-23001">
+
+      <label style="font-size:0.8em; color:#7f8c8d;">Diagnóstico Inicial</label>
+      <textarea id="new-diag" rows="4" placeholder="Describe daños, golpes, zapatillas rotas..."></textarea>
+      
+      <div style="display:flex; gap:10px; margin-top:15px;">
+        <button onclick="guardarTicket()" style="background:var(--accent)">GUARDAR INGRESO</button>
         <button onclick="volverInicio()" style="background:#95a5a6">CANCELAR</button>
       </div>
     </div>
   </div>
 
   <div id="timer-overlay" class="hidden">
-    <div>TRABAJANDO EN TICKET #<span id="timer-ticket"></span></div>
+    <div style="font-size:1.2em; opacity:0.8;">TRABAJANDO EN TICKET</div>
+    <div id="timer-ticket" style="font-size:2em; font-weight:bold; color:var(--accent);">#000</div>
+    
     <div id="timer-display">00:00:00</div>
+    
     <div class="timer-controls">
-      <button class="btn-pause" onclick="pausarTimer()">PAUSAR</button>
-      <button class="btn-stop" onclick="detenerTimer()">TERMINAR</button>
+      <button class="btn-pause" onclick="pausarTimer()">⏸ PAUSAR</button>
+      <button class="btn-stop" onclick="detenerTimer()">⏹ TERMINAR</button>
     </div>
+    <div style="margin-top:30px; font-size:0.9em;">No cierres esta pestaña mientras el reloj corre.</div>
   </div>
 
   <script>
@@ -88,74 +229,104 @@
     let timerInterval = null;
     let currentTicket = null;
 
-    // --- LOGIN ---
+    // --- 1. LOGIN ---
     function doLogin() {
       const u = document.getElementById('user').value;
       const p = document.getElementById('pass').value;
+      
+      if(!u || !p) return;
+      
+      const btn = document.querySelector('#login-view button');
+      btn.innerText = "Verificando...";
+      
       google.script.run.withSuccessHandler(res => {
         if(res.success) {
           userSession = res;
           document.getElementById('login-view').classList.add('hidden');
           document.getElementById('app-view').classList.remove('hidden');
           document.getElementById('welcome-msg').innerText = `Hola, ${res.nombre}`;
-          buscar(''); // Cargar historial
+          buscar(''); // Carga inicial
         } else {
-          document.getElementById('login-msg').innerText = "Credenciales incorrectas";
+          document.getElementById('login-msg').innerText = "Usuario o contraseña incorrectos";
+          btn.innerText = "INGRESAR AL TALLER";
         }
       }).validarLogin(u, p);
     }
 
-    // --- BUSCADOR ---
+    function logout() {
+      location.reload();
+    }
+
+    // --- 2. BUSCADOR Y RENDERIZADO ---
     function buscar(q) {
-      if(q.length < 1 && q !== '') return;
       google.script.run.withSuccessHandler(renderTickets).obtenerHistorial(q);
     }
 
     function renderTickets(tickets) {
-      const div = document.getElementById('results-container');
-      div.innerHTML = '';
+      const container = document.getElementById('results-container');
+      container.innerHTML = '';
+      
+      if(tickets.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:20px;">No se encontraron instrumentos.</div>';
+        return;
+      }
+
       tickets.forEach(t => {
-        const bg = t.estado === 'Recibido' ? '#95a5a6' : (t.estado === 'Listo' ? '#2ecc71' : '#3498db');
+        // Lógica de colores según estado
+        let colorClass = 'status-Recibido';
+        if(t.estado.includes('Proceso')) colorClass = 'status-Proceso';
+        if(t.estado.includes('Listo')) colorClass = 'status-Listo';
         
-        let actions = `<button onclick="iniciarTrabajo('${t.ticket}')" style="margin-top:10px;">⏱️ TRABAJAR</button>`;
-        if(t.estado === 'Listo') {
-          const msg = `Hola ${t.cliente}, tu ${t.instrumento} (${t.serie}) está listo. Coordinemos la entrega.`;
-          actions = `<button onclick="window.open('https://wa.me/?text=${encodeURIComponent(msg)}')" style="background:#25D366; margin-top:10px;">📱 AVISAR WHATSAPP</button>`;
+        // Botones de Acción
+        let actions = `<button onclick="iniciarTrabajo('${t.ticket}')" style="margin-top:15px; background:var(--primary);">⏱️ INICIAR TRABAJO</button>`;
+        
+        if(t.estado === 'Listo' || t.estado === 'Entregado') {
+          const msg = `Hola ${t.cliente}, tu ${t.instrumento} (${t.serie}) está listo para entrega. El total es: ...`; // Podríamos sumar precio si tuviéramos
+          actions = `<button onclick="window.open('https://wa.me/?text=${encodeURIComponent(msg)}')" style="background:#25D366; margin-top:15px;">📱 AVISAR POR WHATSAPP</button>`;
         }
 
-        div.innerHTML += `
+        container.innerHTML += `
           <div class="card">
-            <div class="header" style="margin-bottom:5px;">
-              <b>#${t.ticket}</b>
-              <span class="status-badge" style="background:${bg}">${t.estado}</span>
+            <div class="header-bar" style="margin-bottom:10px;">
+              <b style="font-size:1.1em; color:var(--primary);">#${t.ticket}</b>
+              <span class="status-badge ${colorClass}">${t.estado}</span>
             </div>
-            <div style="font-size:1.1em; font-weight:bold;">${t.instrumento} - ${t.marca}</div>
-            <div style="color:#7f8c8d; font-size:0.9em;">Serie: ${t.serie}</div>
-            <div style="margin-top:5px;">Cliente: ${t.cliente}</div>
-            <div style="margin-top:10px; font-size:0.9em; font-style:italic;">"${t.diagnostico}"</div>
+            
+            <div style="font-size:1.3em; font-weight:bold; margin-bottom:5px;">${t.instrumento}</div>
+            <div style="color:#555;">${t.marca} <span style="color:#bbb;">|</span> Serie: <b>${t.serie}</b></div>
+            
+            <div style="margin-top:10px; padding:10px; background:#f9f9f9; border-radius:5px; font-size:0.9em;">
+              <strong>Cliente:</strong> ${t.cliente}<br>
+              <em style="color:#7f8c8d;">"${t.diagnostico}"</em>
+              <br><small style="color:#999;">Ingreso: ${t.fecha}</small>
+            </div>
             ${actions}
           </div>
         `;
       });
     }
 
-    // --- NUEVO INGRESO ---
+    // --- 3. NUEVO INGRESO ---
     function mostrarNuevoIngreso() {
       document.getElementById('app-view').classList.add('hidden');
       document.getElementById('new-view').classList.remove('hidden');
-      // Precargar clientes para autocompletado
+      
+      // Cargar clientes para autocompletar
       google.script.run.withSuccessHandler(res => {
         const list = document.getElementById('clientes-list');
         list.innerHTML = '';
         res.forEach(c => {
           const opt = document.createElement('option');
-          opt.value = c.nombre;
+          opt.value = c.nombre; // Podrías concatenar (Banda X)
           list.appendChild(opt);
         });
       }).buscarClientes('');
     }
 
     function guardarTicket() {
+      const btn = document.querySelector('#new-view button');
+      btn.innerText = "Guardando...";
+      
       const datos = {
         cliente: document.getElementById('new-cliente').value,
         instrumento: document.getElementById('new-inst').value,
@@ -163,9 +334,15 @@
         serie: document.getElementById('new-serie').value,
         diagnostico: document.getElementById('new-diag').value
       };
+      
       google.script.run.withSuccessHandler(() => {
+        alert("¡Ticket Creado Exitosamente!");
+        btn.innerText = "GUARDAR INGRESO";
+        // Limpiar formulario
+        document.getElementById('new-serie').value = '';
+        document.getElementById('new-diag').value = '';
         volverInicio();
-        buscar('');
+        buscar(''); // Refrescar lista
       }).guardarIngreso(datos);
     }
 
@@ -174,41 +351,51 @@
       document.getElementById('app-view').classList.remove('hidden');
     }
 
-    // --- CRONOMETRO ---
+    // --- 4. CRONÓMETRO ---
     function iniciarTrabajo(ticketId) {
       currentTicket = ticketId;
       document.getElementById('timer-ticket').innerText = ticketId;
       document.getElementById('timer-overlay').classList.remove('hidden');
+      
       seconds = 0;
+      document.getElementById('timer-display').innerText = "00:00:00";
+      
+      // Actualizar estado en Sheet a "En Proceso"
+      google.script.run.actualizarEstado(ticketId, "En Proceso");
+
       timerInterval = setInterval(() => {
         seconds++;
         const date = new Date(0);
         date.setSeconds(seconds);
-        document.getElementById('timer-display').innerText = date.toISOString().substr(11, 8);
+        // Formato HH:MM:SS
+        const timeString = date.toISOString().substr(11, 8);
+        document.getElementById('timer-display').innerText = timeString;
       }, 1000);
-      
-      // Actualizar estado a "En Proceso"
-      google.script.run.actualizarEstado(ticketId, "En Proceso");
     }
 
     function pausarTimer() {
-      // Solo oculta visualmente, pero aquí podrías guardar el parcial
-      alert("Pausado. (Lógica de pausa simple para v1.0)");
+      alert("Pausa activada. Dale Aceptar para continuar.");
+      // En v1.0 la pausa es simple, detiene el hilo visual hasta que aceptas el alert
     }
 
     function detenerTimer() {
       clearInterval(timerInterval);
-      document.getElementById('timer-overlay').classList.add('hidden');
       const tiempoFinal = document.getElementById('timer-display').innerText;
       
-      const terminar = confirm("¿Trabajo terminado? Aceptar para marcar como LISTO, Cancelar para seguir luego.");
-      const estado = terminar ? "Listo" : "En Proceso";
+      const terminado = confirm(`Tiempo registrado: ${tiempoFinal}.\n\n¿El trabajo está 100% TERMINADO (Listo para entrega)?\n\n[ACEPTAR] = Sí, cambiar a LISTO.\n[CANCELAR] = No, solo guardar tiempo y seguir luego.`);
       
+      const nuevoEstado = terminado ? "Listo" : "En Proceso";
+      
+      // Ocultar overlay
+      document.getElementById('timer-overlay').classList.add('hidden');
+      
+      // Guardar en Backend
       google.script.run.withSuccessHandler(() => {
-        buscar('');
-      }).actualizarEstado(currentTicket, estado, tiempoFinal);
+        buscar(''); // Refrescar dashboard
+        alert("Tiempo guardado correctamente.");
+      }).actualizarEstado(currentTicket, nuevoEstado, tiempoFinal);
     }
+
   </script>
 </body>
 </html>
-
