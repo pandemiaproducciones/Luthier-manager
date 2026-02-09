@@ -2,131 +2,62 @@
 <html>
 <head>
   <base target="_top">
-  <title>Luthier Manager v1.2</title>
+  <title>LUTHIER MANAGER v1.3</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
   
   <style>
-    :root { 
-      --primary: #2C3E50; 
-      --accent: #E67E22; 
-      --bg: #F8F9FA; 
-      --white: #FFFFFF;
-    }
-    
-    body { 
-      font-family: 'Montserrat', sans-serif; 
-      background-color: var(--bg); 
-      margin: 0; 
-      padding: 0; 
-      color: var(--primary);
-    }
-
+    :root { --primary: #2C3E50; --accent: #E67E22; --bg: #F8F9FA; --white: #FFFFFF; }
+    body { font-family: 'Montserrat', sans-serif; background-color: var(--bg); margin: 0; padding: 0; color: var(--primary); }
     .hidden { display: none !important; }
 
-    /* ESTILOS DE LOGIN */
-    #view-login {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      padding: 20px;
+    /* CARGANDO / LOADER */
+    #loader {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(255,255,255,0.8); z-index: 3000;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
     }
-
-    .login-card {
-      background: var(--white);
-      padding: 40px;
-      border-radius: 15px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-      width: 100%;
-      max-width: 350px;
-      text-align: center;
+    .spinner {
+      border: 4px solid #f3f3f3; border-top: 4px solid var(--accent);
+      border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite;
     }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    /* ESTILOS DE COMPONENTES */
-    input, textarea, select {
-      width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      border: 1px solid #DDD;
-      border-radius: 8px;
-      font-family: 'Montserrat';
-      box-sizing: border-box;
-    }
+    /* LOGIN */
+    #view-login { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+    .login-card { background: var(--white); padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 90%; max-width: 350px; text-align: center; }
 
-    button {
-      width: 100%;
-      padding: 12px;
-      background-color: var(--primary);
-      color: var(--white);
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    button.secondary { background-color: var(--accent); }
-    button.ghost { background: transparent; color: var(--primary); border: 1px solid var(--primary); }
-
-    /* DASHBOARD */
+    /* DASHBOARD Y COMPONENTES */
     .container { max-width: 600px; margin: auto; padding: 20px; }
-    
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
+    .card { background: var(--white); padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 15px; border-left: 5px solid var(--primary); }
+    input, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #DDD; border-radius: 8px; font-family: 'Montserrat'; box-sizing: border-box; }
+    button { width: 100%; padding: 12px; background-color: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; margin-top: 5px; }
+    .secondary { background-color: var(--accent); }
+    .ghost { background: transparent; color: var(--primary); border: 1px solid var(--primary); }
 
-    .card {
-      background: var(--white);
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-      margin-bottom: 15px;
-    }
+    /* ESTADOS */
+    .status-pill { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+    .status-PRESENTE { background: #2ECC71; color: white; }
+    .status-RETARDO { background: #F1C40F; color: black; }
+    .status-AUSENTE { background: #E74C3C; color: white; }
+    .status-EXCUSA { background: #3498DB; color: white; }
 
-    .status-pill {
-      display: inline-block;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: bold;
-      text-transform: uppercase;
-      background: #EEE;
-    }
-
-    /* ESTADOS SEGÚN PREFERENCIAS */
-    .status-presente { background: #2ECC71; color: white; }
-    .status-retardo { background: #F1C40F; color: black; }
-    .status-ausente { background: #E74C3C; color: white; }
-    .status-excusa { background: #3498DB; color: white; }
-
-    /* CRONÓMETRO */
-    #timer-overlay {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(44, 62, 80, 0.98);
-      color: white;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-
-    #timer-clock { font-size: 80px; font-weight: bold; margin: 20px 0; }
+    /* CRONÓMETRO GIGANTE */
+    #timer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary); color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 2000; }
+    #timer-clock { font-size: 80px; font-weight: bold; margin: 20px 0; font-variant-numeric: tabular-nums; }
   </style>
 </head>
 <body>
 
+  <div id="loader" class="hidden">
+    <div class="spinner"></div>
+    <p style="margin-top:15px; font-weight:bold; letter-spacing:1px;">CARGANDO...</p>
+  </div>
+
   <div id="view-login">
     <div class="login-card">
-      <h2 style="margin-bottom: 30px;">LUTHIER MANAGER v1.2</h2>
+      <h2 style="margin-bottom: 5px;">LUTHIER MANAGER</h2>
+      <p style="font-size: 12px; color: #7f8c8d; margin-bottom: 30px;">VERSION 1.3</p>
       <input type="text" id="user" placeholder="USUARIO">
       <input type="password" id="pass" placeholder="CONTRASEÑA">
       <button onclick="ejecutarLogin()">INGRESAR</button>
@@ -136,31 +67,29 @@
 
   <div id="view-main" class="hidden">
     <div class="container">
-      <div class="header">
-        <h3 id="display-user">HOLA, LUTHIER</h3>
-        <button class="ghost" style="width: auto; padding: 5px 15px;" onclick="cerrarSesion()">SALIR</button>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h3 id="display-user" style="margin:0;">HOLA, LUTHIER</h3>
+        <button class="ghost" style="width:auto; padding:5px 15px;" onclick="location.reload()">SALIR</button>
       </div>
 
-      <div class="card">
-        <input type="text" id="search-input" placeholder="BUSCAR POR SERIE O CLIENTE..." onkeyup="actualizarBusqueda(this.value)">
+      <div class="card" style="border:none;">
+        <input type="text" id="search-input" placeholder="BUSCAR SERIE O CLIENTE..." onkeyup="actualizarBusqueda(this.value)">
         <button class="secondary" onclick="mostrarVistaNuevo()">+ NUEVO INGRESO</button>
       </div>
 
-      <div id="list-reparaciones">
-        </div>
+      <div id="list-reparaciones"></div>
     </div>
   </div>
 
   <div id="view-new" class="hidden">
     <div class="container">
       <div class="card">
-        <h3>REGISTRAR INGRESO</h3>
-        <input type="text" id="form-cliente" placeholder="NOMBRE DE DUEÑO O AGRUPACIÓN">
+        <h3 style="margin-top:0;">NUEVO REGISTRO</h3>
+        <input type="text" id="form-cliente" placeholder="DUEÑO O AGRUPACIÓN">
         <input type="text" id="form-instrumento" placeholder="INSTRUMENTO">
         <input type="text" id="form-marca" placeholder="MARCA">
         <input type="text" id="form-serie" placeholder="NÚMERO DE SERIE">
         <textarea id="form-diagnostico" placeholder="DIAGNÓSTICO INICIAL" rows="4"></textarea>
-        
         <button onclick="enviarFormulario()">GUARDAR EN DRIVE</button>
         <button class="ghost" onclick="mostrarVistaDashboard()" style="margin-top: 10px;">CANCELAR</button>
       </div>
@@ -168,11 +97,12 @@
   </div>
 
   <div id="timer-overlay" class="hidden">
-    <p>TRABAJANDO EN: <strong id="timer-tkt-id">#0000</strong></p>
+    <p style="letter-spacing:2px;">TRABAJANDO EN TICKET</p>
+    <div id="timer-tkt-id" style="font-size: 24px; font-weight: bold; color: var(--accent);">#0000</div>
     <div id="timer-clock">00:00:00</div>
     <div style="display: flex; gap: 15px;">
-      <button onclick="detenerReloj(false)" style="background: #F1C40F; color: black;">PAUSAR</button>
-      <button onclick="detenerReloj(true)" style="background: #E74C3C;">TERMINAR</button>
+      <button onclick="detenerReloj(false)" style="background: #F1C40F; color: black; width:140px;">PAUSAR</button>
+      <button onclick="detenerReloj(true)" style="background: #E74C3C; width:140px;">TERMINAR</button>
     </div>
   </div>
 
@@ -182,12 +112,18 @@
     let totalSeconds = 0;
     let activeTicketId = null;
 
-    // --- AUTENTICACIÓN ---
+    function toggleLoader(show) {
+      document.getElementById('loader').classList[show ? 'remove' : 'add']('hidden');
+    }
+
     function ejecutarLogin() {
       const u = document.getElementById('user').value;
       const p = document.getElementById('pass').value;
-      
+      if(!u || !p) return;
+
+      toggleLoader(true);
       google.script.run.withSuccessHandler(res => {
+        toggleLoader(false);
         if(res.success) {
           sessionData = res;
           document.getElementById('view-login').classList.add('hidden');
@@ -200,40 +136,23 @@
       }).validarLogin(u, p);
     }
 
-    function cerrarSesion() {
-      location.reload();
-    }
-
-    // --- NAVEGACIÓN ---
-    function mostrarVistaNuevo() {
-      document.getElementById('view-main').classList.add('hidden');
-      document.getElementById('view-new').classList.remove('hidden');
-    }
-
-    function mostrarVistaDashboard() {
-      document.getElementById('view-new').classList.add('hidden');
-      document.getElementById('view-main').classList.remove('hidden');
-    }
-
-    // --- FUNCIONES DE NEGOCIO ---
     function actualizarBusqueda(query) {
       google.script.run.withSuccessHandler(data => {
         const listDiv = document.getElementById('list-reparaciones');
         listDiv.innerHTML = '';
-        
         data.forEach(item => {
-          const statusClass = `status-${item.estado.toLowerCase()}`;
+          const pillClass = `status-${item.estado.toUpperCase()}`;
           listDiv.innerHTML += `
             <div class="card">
-              <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                <strong>${item.inst.toUpperCase()} - ${item.marca.toUpperCase()}</strong>
-                <span class="status-pill ${statusClass}">${item.estado}</span>
+              <div style="display:flex; justify-content:space-between;">
+                <strong>${item.inst.toUpperCase()}</strong>
+                <span class="status-pill ${pillClass}">${item.estado}</span>
               </div>
-              <p style="font-size: 13px; margin: 5px 0;">CLIENTE: ${item.cliente.toUpperCase()}</p>
-              <p style="font-size: 12px; color: #777;">SERIE: ${item.serie} | TICKET: ${item.tkt}</p>
-              <div style="margin-top: 15px; display: flex; gap: 10px;">
-                <button onclick="iniciarReloj('${item.tkt}')" style="font-size: 11px; padding: 8px;">TRABAJAR</button>
-                <button class="secondary" onclick="abrirWhatsApp('${item.cliente}', '${item.inst}')" style="font-size: 11px; padding: 8px;">NOTIFICAR</button>
+              <p style="font-size:13px; margin:5px 0;">${item.marca.toUpperCase()} | SERIE: ${item.serie}</p>
+              <p style="font-size:12px; color:#7f8c8d;">${item.cliente.toUpperCase()}</p>
+              <div style="margin-top:15px; display:flex; gap:10px;">
+                <button onclick="iniciarReloj('${item.tkt}')" style="font-size:11px; padding:8px;">CRONÓMETRO</button>
+                <button class="secondary" onclick="abrirWhatsApp('${item.cliente}', '${item.inst}')" style="font-size:11px; padding:8px;">NOTIFICAR</button>
               </div>
             </div>`;
         });
@@ -248,27 +167,20 @@
         serie: document.getElementById('form-serie').value,
         diagnostico: document.getElementById('form-diagnostico').value
       };
-
+      toggleLoader(true);
       google.script.run.withSuccessHandler(() => {
+        toggleLoader(false);
         limpiarFormulario();
         mostrarVistaDashboard();
         actualizarBusqueda('');
       }).guardarIngreso(sessionData.dbId, info);
     }
 
-    function limpiarFormulario() {
-      ['form-cliente', 'form-instrumento', 'form-marca', 'form-serie', 'form-diagnostico'].forEach(id => {
-        document.getElementById(id).value = '';
-      });
-    }
-
-    // --- CRONÓMETRO ---
     function iniciarReloj(id) {
       activeTicketId = id;
       document.getElementById('timer-tkt-id').innerText = `#${id}`;
       document.getElementById('timer-overlay').classList.remove('hidden');
       totalSeconds = 0;
-      
       clockInterval = setInterval(() => {
         totalSeconds++;
         const h = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
@@ -276,27 +188,28 @@
         const s = (totalSeconds % 60).toString().padStart(2, '0');
         document.getElementById('timer-clock').innerText = `${h}:${m}:${s}`;
       }, 1000);
-
-      // Cambiar estado a RETARDO al iniciar trabajo
       google.script.run.actualizarReparacion(sessionData.dbId, id, "RETARDO", "");
     }
 
     function detenerReloj(finalizar) {
       clearInterval(clockInterval);
-      const tiempoTranscurrido = document.getElementById('timer-clock').innerText;
-      const estadoFinal = finalizar ? "PRESENTE" : "RETARDO"; 
-
+      const tiempo = document.getElementById('timer-clock').innerText;
+      toggleLoader(true);
       google.script.run.withSuccessHandler(() => {
+        toggleLoader(false);
         document.getElementById('timer-overlay').classList.add('hidden');
         actualizarBusqueda('');
-      }).actualizarReparacion(sessionData.dbId, activeTicketId, finalizar ? "LISTO" : "RETARDO", tiempoTranscurrido);
+      }).actualizarReparacion(sessionData.dbId, activeTicketId, finalizar ? "PRESENTE" : "RETARDO", tiempo);
     }
 
-    function abrirWhatsApp(cliente, instrumento) {
-      const texto = `HOLA ${cliente.toUpperCase()}, TU ${instrumento.toUpperCase()} YA ESTÁ LISTO. COORDINEMOS LA ENTREGA.`;
-      const url = `https://wa.me/?text=${encodeURIComponent(texto)}`;
-      window.open(url, '_blank');
+    function abrirWhatsApp(cli, ins) {
+      const msg = `HOLA ${cli.toUpperCase()}, TU ${ins.toUpperCase()} ESTÁ LISTO. COORDINEMOS LA ENTREGA.`;
+      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
     }
+
+    function mostrarVistaNuevo() { document.getElementById('view-main').classList.add('hidden'); document.getElementById('view-new').classList.remove('hidden'); }
+    function mostrarVistaDashboard() { document.getElementById('view-new').classList.add('hidden'); document.getElementById('view-main').classList.remove('hidden'); }
+    function limpiarFormulario() { ['form-cliente','form-instrumento','form-marca','form-serie','form-diagnostico'].forEach(id => document.getElementById(id).value = ''); }
   </script>
 </body>
 </html>
