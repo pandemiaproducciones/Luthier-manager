@@ -228,4 +228,106 @@
 
         function selectSlot(time, element) {
             document.querySelectorAll('.slot-available').forEach(el => { el.classList.remove('bg-gray-900', 'text-white', 'border-gray-900'); el.classList.add('bg-green-50', 'text-green-900', 'border-green-500'); });
-            element.classList.remove('bg-green-50', 'text-green-
+            element.classList.remove('bg-green-50', 'text-green-900', 'border-green-500'); element.classList.add('bg-gray-900', 'text-white', 'border-gray-900');
+            document.getElementById('selectedTime').value = time;
+            document.getElementById('displayTime').textContent = time;
+            document.getElementById('clientForm').classList.remove('hidden');
+            document.getElementById('clientForm').scrollIntoView({behavior: 'smooth'});
+        }
+
+        async function submitBooking() {
+            const date = document.getElementById('bookingDate').value;
+            const time = document.getElementById('selectedTime').value;
+            const name = document.getElementById('clientName').value;
+            const phone = document.getElementById('clientPhone').value;
+            if(!name || !phone) return Swal.fire('Falta info', 'Llena nombre y teléfono', 'warning');
+
+            showLoader(true);
+            await fetchAPI({ action: "bookAppointment", sheetId: PUBLIC_LUTHIER_ID, bookingData: { fecha: date, hora: time, cliente: name, telefono: phone } });
+            Swal.fire('Solicitud Enviada', 'El luthier confirmará pronto.', 'success').then(() => window.location.reload());
+            showLoader(false);
+        }
+
+        // --- DASHBOARD & CONFIRMACIÓN (FIXED SPINNER) ---
+        async function confirmCita(id, status) {
+            showLoader(true);
+            try {
+                const res = await fetchAPI({ action: "confirmAppointment", sheetId: currentUser.sheetId, citaId: id, status: status });
+                if(res.status === 'success' && status === 'CONFIRMADA') {
+                    const d = res.data;
+                    const url = `https://wa.me/${d.telefono.replace(/\D/g,'')}?text=${encodeURIComponent(`HOLA ${d.cliente}, TU CITA EL ${d.fecha} A LAS ${d.hora} HA SIDO CONFIRMADA.`)}`;
+                    window.open(url, '_blank');
+                }
+                await loadAgenda();
+            } catch (error) {
+                console.error(error);
+                Swal.fire('Error', 'Hubo un problema.', 'error');
+            } finally {
+                showLoader(false); // IMPORTANTE: Se ejecuta siempre para cerrar el spinner
+            }
+        }
+
+        async function loadAgenda() {
+            const res = await fetchAPI({ action: "getAgendaRequests", sheetId: currentUser.sheetId });
+            const tbody = document.getElementById('agendaTableBody'); tbody.innerHTML = '';
+            
+            if(!res.data || res.data.length === 0) {
+                 tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-gray-500">NO HAY SOLICITUDES</td></tr>';
+                 return;
+            }
+
+            res.data.forEach(c => {
+                const isPending = c.estado === 'PENDIENTE';
+                tbody.innerHTML += `<tr class="border-b ${isPending?'bg-blue-50':''}"><td class="p-4 font-bold">${c.fecha}<br><span class="text-xs font-normal">${c.hora}</span></td><td class="p-4">${c.cliente}</td><td class="p-4">${c.telefono}</td><td class="p-4 font-bold text-xs">${c.estado}</td><td class="p-4">${isPending ? `<button onclick="confirmCita('${c.id}','CONFIRMADA')" class="text-green-600 mr-4"><i class="fa-solid fa-check fa-lg"></i></button><button onclick="confirmCita('${c.id}','RECHAZADA')" class="text-red-600"><i class="fa-solid fa-times fa-lg"></i></button>` : '-'}</td></tr>`;
+            });
+        }
+
+        // --- RESTO DE FUNCIONES ---
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); showLoader(true);
+            const res = await fetchAPI({ action: "login", usuario: document.getElementById('user').value, clave: document.getElementById('pass').value });
+            showLoader(false);
+            if(res.status === 'success') { currentUser = res.data; localStorage.setItem('luthierUser', JSON.stringify(currentUser)); showDashboard(); }
+            else Swal.fire('Error', 'Credenciales incorrectas', 'error');
+        });
+
+        function showDashboard() {
+            hideAllViews(); document.getElementById('view-dashboard').classList.remove('hidden');
+            document.getElementById('luthierName').textContent = currentUser.nombre;
+            switchTab('reparaciones');
+        }
+
+        function switchTab(tab) {
+            document.getElementById('panel-reparaciones').classList.add('hidden'); document.getElementById('panel-agenda').classList.add('hidden');
+            document.getElementById('tab-reparaciones').classList.remove('border-b-4', 'border-gray-900', 'text-gray-900');
+            document.getElementById('tab-agenda').classList.remove('border-b-4', 'border-gray-900', 'text-gray-900');
+            document.getElementById(`tab-${tab}`).classList.add('border-b-4', 'border-gray-900', 'text-gray-900');
+            document.getElementById(`panel-${tab}`).classList.remove('hidden');
+            if(tab === 'reparaciones') loadReparaciones(); else { showLoader(true); loadAgenda().then(() => showLoader(false)); }
+        }
+
+        async function loadReparaciones() {
+            showLoader(true);
+            const res = await fetchAPI({ action: "getDashboardData", sheetId: currentUser.sheetId });
+            const tbody = document.getElementById('jobsTableBody'); tbody.innerHTML = '';
+            res.data.forEach(job => tbody.innerHTML += `<tr class="border-b"><td class="p-4 font-bold">${job.ticketId}</td><td class="p-4">${job.cliente}</td><td class="p-4">${job.instrumento}</td><td class="p-4"><span class="bg-yellow-100 px-2 rounded font-bold text-xs">${job.estado}</span></td><td class="p-4"><button onclick='openTimer(${JSON.stringify(job)})' class="text-xl"><i class="fa-solid fa-clock"></i></button></td></tr>`);
+            showLoader(false);
+        }
+
+        async function fetchAPI(data) { const r = await fetch(API_URL, { method: "POST", body: JSON.stringify(data) }); return await r.json(); }
+        function showLoader(show) { document.getElementById('loader').classList.toggle('hidden', !show); }
+        function logout() { localStorage.removeItem('luthierUser'); location.reload(); }
+        
+        function openTimer(job) { activeTicket=job; document.getElementById('view-timer').classList.remove('hidden'); document.getElementById('timerInstrument').textContent=job.instrumento; document.getElementById('timerClient').textContent=job.cliente; secondsElapsed=parseTime(job.tiempo); updateDisplay(); isTimerRunning=false; updateTimerUI(); }
+        function toggleTimer() { if(isTimerRunning){clearInterval(timerInterval);isTimerRunning=false;}else{timerInterval=setInterval(()=>{secondsElapsed++;updateDisplay();},1000);isTimerRunning=true;} updateTimerUI(); }
+        function updateTimerUI() { const btn=document.getElementById('btnToggleTimer'); if(isTimerRunning){btn.innerHTML='<i class="fa-solid fa-pause"></i> PAUSAR';btn.className="bg-yellow-500 hover:bg-yellow-400 text-white font-bold py-6 px-12 rounded-full text-2xl shadow-lg min-w-[200px]";}else{btn.innerHTML='<i class="fa-solid fa-play"></i> INICIAR';btn.className="bg-green-600 hover:bg-green-500 text-white font-bold py-6 px-12 rounded-full text-2xl shadow-lg min-w-[200px]";} }
+        function updateDisplay() { document.getElementById('timerDisplay').textContent=`${pad(Math.floor(secondsElapsed/3600))}:${pad(Math.floor((secondsElapsed%3600)/60))}:${pad(secondsElapsed%60)}`; }
+        async function finishJob() { if(isTimerRunning)toggleTimer(); const finalTime=document.getElementById('timerDisplay').textContent; const {value:confirm}=await Swal.fire({title:'¿TERMINAR?',text:`Tiempo: ${finalTime}`,icon:'warning',showCancelButton:true}); if(confirm){ showLoader(true); await fetchAPI({action:"saveTicket",sheetId:currentUser.sheetId,ticketData:{id:activeTicket.ticketId,cliente:activeTicket.cliente,instrumento:activeTicket.instrumento,serie:activeTicket.serie,estado:"TERMINADO",diagnostico:"TIEMPO: "+finalTime}}); closeTimer(); loadReparaciones(); showLoader(false); Swal.fire('Listo','','success'); } }
+        function closeTimer() { if(isTimerRunning)clearInterval(timerInterval); document.getElementById('view-timer').classList.add('hidden'); }
+        function pad(v){return v>9?v:"0"+v} function parseTime(t){if(!t)return 0;if(typeof t==='object'){let d=new Date(t);return d.getHours()*3600+d.getMinutes()*60+d.getSeconds()}if(typeof t==='string'&&t.includes(':')){let p=t.split(':');return (+p[0])*3600+(+p[1])*60+(+p[2])}return 0;}
+        function openNewTicketModal() { document.getElementById('modalNewTicket').classList.remove('hidden'); }
+        function closeNewTicketModal() { document.getElementById('modalNewTicket').classList.add('hidden'); }
+        document.getElementById('newTicketForm').addEventListener('submit', async(e)=>{ e.preventDefault(); showLoader(true); await fetchAPI({action:"saveTicket", sheetId:currentUser.sheetId, ticketData:Object.fromEntries(new FormData(e.target))}); closeNewTicketModal(); loadReparaciones(); showLoader(false); });
+    </script>
+</body>
+</html>
