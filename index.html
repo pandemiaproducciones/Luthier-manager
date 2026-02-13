@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luthier Manager v2.11</title>
+    <title>Luthier Manager v2.12</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -38,7 +38,7 @@
     <section id="view-selection" class="min-h-screen flex flex-col items-center justify-center p-4 bg-gray-100">
         <div class="text-center mb-10">
             <h1 class="text-4xl md:text-5xl font-bold tracking-wider mb-2 text-gray-900">LUTHIER MANAGER</h1>
-            <span class="bg-gray-900 text-white px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider shadow-sm">v2.11</span>
+            <span class="bg-gray-900 text-white px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider shadow-sm">v2.12</span>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
@@ -134,7 +134,7 @@
             <button id="btnBackLuthier" onclick="goLuthierHome()" class="text-white hover:text-gray-300 font-semibold flex items-center gap-2 transition hidden">
                 <span class="fa-solid fa-arrow-left"></span> ATRÁS
             </button>
-            <span id="headerLuthierTitle" class="font-bold text-lg tracking-wider">LUTHIER MANAGER v2.11</span>
+            <span id="headerLuthierTitle" class="font-bold text-lg tracking-wider">LUTHIER MANAGER v2.12</span>
             <div class="flex items-center gap-4">
                 <span id="luthierName" class="font-semibold text-sm hidden md:inline text-gray-300"></span>
                 <button onclick="logout()" class="text-white hover:text-red-400 transition" title="CERRAR SESIÓN"><span class="fa-solid fa-right-from-bracket text-lg"></span></button>
@@ -258,7 +258,8 @@
         
         let isProcessing = false; 
 
-        function escapeStr(str) { return str ? String(str).replace(/'/g, "\\'").replace(/"/g, "&quot;") : ""; }
+        // Helper para evitar errores en los botones
+        function safeEnc(str) { return encodeURIComponent(String(str || "")); }
 
         function goHome() { 
             hideAllViews(); document.getElementById('view-selection').classList.remove('hidden'); 
@@ -462,6 +463,7 @@
                         const isPending = c.estado === 'PENDIENTE';
                         const statusBadge = isPending ? `<span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-[10px] font-bold tracking-wider">PENDIENTE</span>` : `<span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-[10px] font-bold tracking-wider">CONFIRMADA</span>`;
                         
+                        // USAMOS safeEnc PARA EVITAR ERRORES DE SINTAXIS EN EL HTML
                         tbody.innerHTML += `
                             <tr class="border-b bg-white hover:bg-gray-50 transition">
                                 <td class="p-3 font-bold text-lg text-gray-900">${c.hora}</td>
@@ -471,8 +473,8 @@
                                 <td class="p-3 text-center">
                                     ${isPending ? `
                                         <div class="flex flex-col md:flex-row justify-center gap-1.5">
-                                            <button onclick="promptConfirmCita('${escapeStr(c.id)}', '${escapeStr(c.cliente)}', '${escapeStr(c.fecha)}', '${escapeStr(c.hora)}', '${escapeStr(c.telefono)}')" class="bg-green-600 text-white px-3 py-1.5 rounded font-semibold shadow-sm hover:bg-green-700 transition tracking-wider text-[10px] md:text-xs"><span class="fa-solid fa-check mr-1"></span> CONFIRMAR</button>
-                                            <button onclick="promptRejectCita('${escapeStr(c.id)}')" class="bg-red-500 text-white px-3 py-1.5 rounded font-semibold shadow-sm hover:bg-red-600 transition text-[10px] md:text-xs"><span class="fa-solid fa-times mr-1"></span> CANCELAR</button>
+                                            <button onclick="promptConfirmCita('${safeEnc(c.id)}', '${safeEnc(c.cliente)}', '${safeEnc(c.fecha)}', '${safeEnc(c.hora)}', '${safeEnc(c.telefono)}')" class="bg-green-600 text-white px-3 py-1.5 rounded font-semibold shadow-sm hover:bg-green-700 transition tracking-wider text-[10px] md:text-xs"><span class="fa-solid fa-check mr-1"></span> CONFIRMAR</button>
+                                            <button onclick="promptRejectCita('${safeEnc(c.id)}')" class="bg-red-500 text-white px-3 py-1.5 rounded font-semibold shadow-sm hover:bg-red-600 transition text-[10px] md:text-xs"><span class="fa-solid fa-times mr-1"></span> CANCELAR</button>
                                         </div>
                                     ` : `<a href="https://wa.me/${c.telefono.replace(/\D/g,'')}" target="_blank" class="bg-gray-800 text-white px-3 py-1.5 rounded font-semibold hover:bg-gray-700 transition inline-block tracking-wider text-[10px] md:text-xs"><span class="fa-brands fa-whatsapp mr-1"></span> CHAT</a>`}
                                 </td>
@@ -505,8 +507,16 @@
             } catch(e) {} finally { isProcessing = false; showLoader(false); }
         }
 
-        async function promptConfirmCita(id, cliente, fecha, hora, telefono) {
+        async function promptConfirmCita(idEnc, clienteEnc, fechaEnc, horaEnc, telefonoEnc) {
             if (isProcessing) return; 
+            
+            // Decodificamos los datos
+            const id = decodeURIComponent(idEnc);
+            const cliente = decodeURIComponent(clienteEnc);
+            const fecha = decodeURIComponent(fechaEnc);
+            const hora = decodeURIComponent(horaEnc);
+            const telefono = decodeURIComponent(telefonoEnc);
+
             const { value: confirm } = await Swal.fire({ title: '¿CONFIRMAR CITA?', text: `Reserva de ${cliente} a las ${hora}.`, icon: 'question', showCancelButton: true, confirmButtonColor: '#1f2937', confirmButtonText: 'SÍ, CONFIRMAR' });
             if (confirm) {
                 isProcessing = true;
@@ -530,8 +540,10 @@
             }
         }
         
-        async function promptRejectCita(id) {
+        async function promptRejectCita(idEnc) {
             if (isProcessing) return;
+            const id = decodeURIComponent(idEnc);
+
             const { value: confirm } = await Swal.fire({ title: '¿RECHAZAR CITA?', text: 'Se liberará el espacio.', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'SÍ, CANCELAR' });
             if (confirm) { 
                 isProcessing = true;
