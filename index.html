@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luthier Manager v2.9</title>
+    <title>Luthier Manager v2.11</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,54 +14,17 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        body { 
-            font-family: 'Montserrat', sans-serif; 
-            background-color: #f3f4f6; 
-            color: #1f2937;
-        }
-        
-        .uppercase-headers h1, .uppercase-headers h2, .uppercase-headers h3, .uppercase-headers th, .uppercase-input {
-            text-transform: uppercase; 
-            letter-spacing: 0.05em;
-        }
-        
-        .loader-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 255, 255, 0.95); z-index: 50;
-            display: flex; justify-content: center; align-items: center; flex-direction: column;
-        }
-        
-        .spinner {
-            border: 6px solid #f3f3f3; border-top: 6px solid #1f2937;
-            border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite;
-        }
-        
+        body { font-family: 'Montserrat', sans-serif; background-color: #f3f4f6; color: #1f2937; }
+        .uppercase-headers h1, .uppercase-headers h2, .uppercase-headers h3, .uppercase-headers th, .uppercase-input { text-transform: uppercase; letter-spacing: 0.05em; }
+        .loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.95); z-index: 50; display: flex; justify-content: center; align-items: center; flex-direction: column; }
+        .spinner { border: 6px solid #f3f3f3; border-top: 6px solid #1f2937; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        .slot-card { 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            padding: 1rem 0.5rem; border-radius: 0.5rem; border: 1px solid; 
-            transition: all 0.2s ease-in-out; text-align: center;
-        }
-        .slot-available { 
-            background-color: #ffffff; border-color: #22c55e; color: #166534; cursor: pointer; 
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-        .slot-available:hover { 
-            background-color: #22c55e; color: #ffffff; transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .slot-reserved { 
-            background-color: #f3f4f6; border-color: #d1d5db; color: #6b7280; cursor: not-allowed; 
-        }
-        .slot-occupied { 
-            background-color: #fef2f2; border-color: #f87171; color: #b91c1c; cursor: not-allowed; 
-        }
-
-        .btn-tile { 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            padding: 2rem; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); 
-            transition: transform 0.2s; cursor: pointer; 
-        }
+        .slot-card { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem 0.5rem; border-radius: 0.5rem; border: 1px solid; transition: all 0.2s ease-in-out; text-align: center; }
+        .slot-available { background-color: #ffffff; border-color: #22c55e; color: #166534; cursor: pointer; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); }
+        .slot-available:hover { background-color: #22c55e; color: #ffffff; transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+        .slot-reserved { background-color: #f3f4f6; border-color: #d1d5db; color: #6b7280; cursor: not-allowed; }
+        .slot-occupied { background-color: #fef2f2; border-color: #f87171; color: #b91c1c; cursor: not-allowed; }
+        .btn-tile { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); transition: transform 0.2s; cursor: pointer; }
         .btn-tile:hover { transform: scale(1.02); }
     </style>
 </head>
@@ -75,7 +38,7 @@
     <section id="view-selection" class="min-h-screen flex flex-col items-center justify-center p-4 bg-gray-100">
         <div class="text-center mb-10">
             <h1 class="text-4xl md:text-5xl font-bold tracking-wider mb-2 text-gray-900">LUTHIER MANAGER</h1>
-            <span class="bg-gray-900 text-white px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider shadow-sm">v2.9</span>
+            <span class="bg-gray-900 text-white px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider shadow-sm">v2.11</span>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
@@ -171,7 +134,7 @@
             <button id="btnBackLuthier" onclick="goLuthierHome()" class="text-white hover:text-gray-300 font-semibold flex items-center gap-2 transition hidden">
                 <span class="fa-solid fa-arrow-left"></span> ATRÁS
             </button>
-            <span id="headerLuthierTitle" class="font-bold text-lg tracking-wider">LUTHIER MANAGER v2.9</span>
+            <span id="headerLuthierTitle" class="font-bold text-lg tracking-wider">LUTHIER MANAGER v2.11</span>
             <div class="flex items-center gap-4">
                 <span id="luthierName" class="font-semibold text-sm hidden md:inline text-gray-300"></span>
                 <button onclick="logout()" class="text-white hover:text-red-400 transition" title="CERRAR SESIÓN"><span class="fa-solid fa-right-from-bracket text-lg"></span></button>
@@ -285,7 +248,7 @@
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbxuPVV3SXEXe2tYZElv16m0nkWdYalr-nu3A041DIKgpJ1CZKKmi0E_gAwO--JnpJSy/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbwQd_ovJ7i13j2fq-jpvpdwdEXDFmMPQJIpaNxsOmmKBCwpkwtdxL71orTh0zDj-ER4/exec";
         const PUBLIC_LUTHIER_ID = "1IHJac6AYB1ehc722umxZvOQSQLz4X-zL3bn1JYsvv3k";
 
         let currentUser = JSON.parse(localStorage.getItem('luthierUser')) || null;
@@ -294,6 +257,8 @@
         const monthNames = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
         
         let isProcessing = false; 
+
+        function escapeStr(str) { return str ? String(str).replace(/'/g, "\\'").replace(/"/g, "&quot;") : ""; }
 
         function goHome() { 
             hideAllViews(); document.getElementById('view-selection').classList.remove('hidden'); 
@@ -420,7 +385,6 @@
                 await Swal.fire({title:'¡SOLICITUD ENVIADA!', text:'El luthier confirmará tu cita pronto.', icon:'success', confirmButtonColor: '#1f2937'});
                 window.location.reload();
             } catch (e) {
-                console.error(e);
                 Swal.fire('ERROR', 'Hubo un problema al enviar la solicitud.', 'error');
             } finally {
                 isProcessing = false;
@@ -507,8 +471,8 @@
                                 <td class="p-3 text-center">
                                     ${isPending ? `
                                         <div class="flex flex-col md:flex-row justify-center gap-1.5">
-                                            <button onclick="promptConfirmCita('${c.id}', '${c.cliente}', '${c.fecha}', '${c.hora}', '${c.telefono}')" class="bg-green-600 text-white px-3 py-1.5 rounded font-semibold shadow-sm hover:bg-green-700 transition tracking-wider text-[10px] md:text-xs"><span class="fa-solid fa-check mr-1"></span> CONFIRMAR</button>
-                                            <button onclick="promptRejectCita('${c.id}')" class="bg-red-500 text-white px-3 py-1.5 rounded font-semibold shadow-sm hover:bg-red-600 transition text-[10px] md:text-xs"><span class="fa-solid fa-times mr-1"></span> CANCELAR</button>
+                                            <button onclick="promptConfirmCita('${escapeStr(c.id)}', '${escapeStr(c.cliente)}', '${escapeStr(c.fecha)}', '${escapeStr(c.hora)}', '${escapeStr(c.telefono)}')" class="bg-green-600 text-white px-3 py-1.5 rounded font-semibold shadow-sm hover:bg-green-700 transition tracking-wider text-[10px] md:text-xs"><span class="fa-solid fa-check mr-1"></span> CONFIRMAR</button>
+                                            <button onclick="promptRejectCita('${escapeStr(c.id)}')" class="bg-red-500 text-white px-3 py-1.5 rounded font-semibold shadow-sm hover:bg-red-600 transition text-[10px] md:text-xs"><span class="fa-solid fa-times mr-1"></span> CANCELAR</button>
                                         </div>
                                     ` : `<a href="https://wa.me/${c.telefono.replace(/\D/g,'')}" target="_blank" class="bg-gray-800 text-white px-3 py-1.5 rounded font-semibold hover:bg-gray-700 transition inline-block tracking-wider text-[10px] md:text-xs"><span class="fa-brands fa-whatsapp mr-1"></span> CHAT</a>`}
                                 </td>
@@ -552,10 +516,14 @@
                     if(res.status === 'success') {
                         const msg = `HOLA ${cliente}, TU RESERVA PARA EL DÍA ${fecha} A LAS ${hora} HA SIDO CONFIRMADA.`;
                         window.open(`https://wa.me/${telefono.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
+                    } else {
+                        Swal.fire('ERROR', res.message || 'No se pudo confirmar la cita.', 'error');
                     }
                     await loadLuthierAgendaForDate(luthierClickedDate); 
                     await fetchMonthData(luthierNav, true);
-                } catch (e) {} finally {
+                } catch (e) {
+                    Swal.fire('ERROR', 'Hubo un error de conexión', 'error');
+                } finally {
                     isProcessing = false;
                     showLoader(false);
                 }
@@ -625,7 +593,7 @@
                                         <span class="bg-yellow-100 px-2 py-1 rounded text-[10px] font-bold text-yellow-800 uppercase tracking-wider">${job.estado}</span>
                                     </div>
                                 </div>
-                                <button onclick='finishJobDirect(${JSON.stringify(job)})' class="bg-red-600 text-white px-5 py-2.5 rounded font-bold hover:bg-red-700 transition shadow-sm flex items-center gap-2 w-full md:w-auto justify-center tracking-wider text-sm">
+                                <button onclick='finishJobDirect(${JSON.stringify(job).replace(/'/g, "\\'")})' class="bg-red-600 text-white px-5 py-2.5 rounded font-bold hover:bg-red-700 transition shadow-sm flex items-center gap-2 w-full md:w-auto justify-center tracking-wider text-sm">
                                     <span class="fa-solid fa-check-double"></span> FINALIZAR
                                 </button>
                             </div>`;
@@ -651,7 +619,8 @@
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#1f2937',
-                confirmButtonText: 'SÍ, FINALIZAR'
+                confirmButtonText: 'SÍ, FINALIZAR',
+                cancelButtonText: 'CANCELAR'
             });
             
             if(confirm){
@@ -670,9 +639,32 @@
                             diagnostico: "TRABAJO FINALIZADO"
                         }
                     });
+                    
                     await loadReparaciones();
-                    Swal.fire('¡LISTO!', 'El trabajo ha sido finalizado con éxito.', 'success');
-                } catch(e) {}
+                    
+                    let phone = job.telefono;
+                    if (!phone) {
+                        const { value: inputPhone } = await Swal.fire({
+                            title: 'ENVIAR NOTIFICACIÓN',
+                            input: 'tel',
+                            inputLabel: 'No se encontró el teléfono del cliente. Ingrésalo para avisarle por WhatsApp:',
+                            inputPlaceholder: 'Ej: 573001234567',
+                            showCancelButton: true,
+                            confirmButtonText: 'ENVIAR',
+                            cancelButtonText: 'OMITIR'
+                        });
+                        phone = inputPhone;
+                    }
+                    
+                    if (phone) {
+                        const msg = `¡HOLA ${job.cliente}! TU INSTRUMENTO (${job.instrumento}) YA ESTÁ LISTO Y PUEDES PASAR A RECOGERLO.`;
+                        window.open(`https://wa.me/${String(phone).replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
+                    } else {
+                        Swal.fire('¡LISTO!', 'El trabajo ha sido finalizado con éxito.', 'success');
+                    }
+                } catch(e) {
+                    Swal.fire('ERROR', 'No se pudo finalizar el trabajo.', 'error');
+                }
                 finally {
                     isProcessing = false;
                     showLoader(false);
