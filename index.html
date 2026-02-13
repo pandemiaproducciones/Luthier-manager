@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luthier Manager v2.13</title>
+    <title>Luthier Manager v2.14</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,9 +19,9 @@
         .loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.95); z-index: 100; display: flex; justify-content: center; align-items: center; flex-direction: column; }
         .spinner { border: 6px solid #f3f3f3; border-top: 6px solid #1f2937; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .slot-card { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem 0.5rem; border-radius: 0.5rem; border: 1px solid; transition: all 0.2s ease-in-out; text-align: center; }
-        .slot-available { background-color: #ffffff; border-color: #22c55e; color: #166534; cursor: pointer; }
-        .slot-available:hover { background-color: #22c55e; color: #ffffff; transform: translateY(-2px); }
+        .slot-card { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem 0.5rem; border-radius: 0.5rem; border: 1px solid; transition: all 0.2s ease-in-out; text-align: center; cursor: pointer; }
+        .slot-available { background-color: #ffffff; border-color: #22c55e; color: #166534; }
+        .slot-selected { background-color: #1f2937 !important; color: white !important; border-color: #1f2937 !important; }
         .btn-tile { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); transition: transform 0.2s; cursor: pointer; }
         .btn-tile:hover { transform: scale(1.02); }
     </style>
@@ -36,7 +36,7 @@
     <section id="view-selection" class="min-h-screen flex flex-col items-center justify-center p-4 bg-gray-100">
         <div class="text-center mb-10">
             <h1 class="text-4xl md:text-5xl font-bold tracking-wider mb-2 text-gray-900">LUTHIER MANAGER</h1>
-            <span class="bg-gray-900 text-white px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider shadow-sm">v2.13</span>
+            <span class="bg-gray-900 text-white px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider shadow-sm">v2.14</span>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
             <div onclick="goToClientView()" class="btn-tile bg-white border-b-4 border-gray-900 text-gray-900">
@@ -57,10 +57,10 @@
             <div class="w-16"></div>
         </header>
         <div class="container mx-auto p-4 md:p-6 max-w-3xl">
-            <div class="bg-white rounded-lg border border-gray-200 p-5 mb-8">
+            <div class="bg-white rounded-lg border border-gray-200 p-5 mb-8 shadow-sm">
                 <div class="flex justify-between items-center mb-5 pb-3 border-b border-gray-100">
                     <button onclick="changeMonth(-1)" class="p-2.5 rounded-full bg-gray-50"><span class="fa-solid fa-chevron-left"></span></button>
-                    <h2 id="monthDisplay" class="text-xl font-bold tracking-wider text-gray-900">CARGANDO...</h2>
+                    <h2 id="monthDisplay" class="text-xl font-bold tracking-wider text-gray-900">MES</h2>
                     <button onclick="changeMonth(1)" class="p-2.5 rounded-full bg-gray-50"><span class="fa-solid fa-chevron-right"></span></button>
                 </div>
                 <div class="grid grid-cols-7 gap-1 text-center font-semibold text-xs text-gray-400 mb-2">
@@ -68,17 +68,19 @@
                 </div>
                 <div id="calendarGrid" class="grid grid-cols-7 gap-1"></div>
             </div>
+
             <div id="slotsContainer" class="hidden">
-                <h3 class="text-xl font-bold mb-4 text-gray-800 border-b-2 border-gray-900 inline-block pb-1 uppercase">HORARIOS</h3>
+                <h3 class="text-xl font-bold mb-4 text-gray-800 border-b-2 border-gray-900 inline-block pb-1 uppercase">HORARIOS DISPONIBLES</h3>
                 <div id="slotsGrid" class="grid grid-cols-3 md:grid-cols-4 gap-3 mb-8"></div>
             </div>
-            <div id="clientForm" class="hidden bg-white p-6 rounded-lg border border-gray-200 shadow-lg">
-                <h3 class="font-bold mb-5 text-xl">CONFIRMAR RESERVA</h3>
+
+            <div id="clientForm" class="hidden bg-white p-6 rounded-lg border border-gray-200 shadow-xl mb-10">
+                <h3 class="font-bold mb-5 text-xl uppercase">CONFIRMAR PARA LAS <span id="displayTime" class="text-blue-600">--:--</span></h3>
                 <div class="space-y-4">
-                    <input type="text" id="clientName" placeholder="NOMBRE COMPLETO" class="w-full p-3 border rounded uppercase-input font-medium" required>
-                    <input type="tel" id="clientPhone" placeholder="WHATSAPP (EJ: 57300...)" class="w-full p-3 border rounded font-medium" required>
+                    <input type="text" id="clientName" placeholder="TU NOMBRE COMPLETO" class="w-full p-4 border rounded uppercase-input font-medium focus:ring-2 focus:ring-gray-900 outline-none" required>
+                    <input type="tel" id="clientPhone" placeholder="WHATSAPP (EJ: 573001234567)" class="w-full p-4 border rounded font-medium focus:ring-2 focus:ring-gray-900 outline-none" required>
                     <input type="hidden" id="selectedTime">
-                    <button onclick="submitBooking()" class="w-full bg-gray-900 text-white font-bold py-4 rounded shadow">ENVIAR SOLICITUD</button>
+                    <button onclick="submitBooking()" class="w-full bg-gray-900 text-white font-bold py-4 rounded shadow-lg hover:bg-gray-800 transition">ENVIAR SOLICITUD DE RESERVA</button>
                 </div>
             </div>
         </div>
@@ -86,20 +88,20 @@
 
     <section id="view-login" class="min-h-screen flex items-center justify-center bg-gray-900 p-4 hidden">
         <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-sm">
-            <h1 class="text-2xl font-bold text-center mb-6">ACCESO LUTHIER</h1>
+            <h1 class="text-2xl font-bold text-center mb-6 uppercase tracking-widest">ACCESO PANEL</h1>
             <form id="loginForm" class="space-y-5">
                 <input type="text" id="user" placeholder="USUARIO" class="w-full p-3 border rounded font-medium" required>
                 <input type="password" id="pass" placeholder="CONTRASEÑA" class="w-full p-3 border rounded font-medium" required>
-                <button type="submit" class="w-full bg-gray-900 text-white font-bold py-3.5 rounded shadow">INGRESAR</button>
-                <button type="button" onclick="goHome()" class="w-full text-gray-500 font-bold mt-2">CANCELAR</button>
+                <button type="submit" class="w-full bg-gray-900 text-white font-bold py-3.5 rounded shadow">INGRESAR AL SISTEMA</button>
+                <button type="button" onclick="goHome()" class="w-full text-gray-500 font-bold mt-2 text-sm">REGRESAR</button>
             </form>
         </div>
     </section>
 
     <section id="view-dashboard" class="min-h-screen hidden bg-gray-100">
         <header class="bg-gray-900 text-white p-4 shadow-md flex justify-between items-center sticky top-0 z-40">
-            <button id="btnBackLuthier" onclick="goLuthierHome()" class="text-white font-semibold flex items-center gap-2 hidden"><span class="fa-solid fa-arrow-left"></span> ATRÁS</button>
-            <span id="headerLuthierTitle" class="font-bold text-lg tracking-wider">LUTHIER MANAGER</span>
+            <button id="btnBackLuthier" onclick="goLuthierHome()" class="text-white font-semibold flex items-center gap-2 hidden"><span class="fa-solid fa-arrow-left"></span> INICIO</button>
+            <span id="headerLuthierTitle" class="font-bold text-lg tracking-wider">PANEL ADMINISTRATIVO</span>
             <button onclick="logout()" class="text-white hover:text-red-400"><span class="fa-solid fa-right-from-bracket text-lg"></span></button>
         </header>
 
@@ -123,18 +125,24 @@
                 <div class="bg-white rounded-lg border border-gray-200 p-5 mb-6 max-w-3xl mx-auto shadow-sm">
                     <div class="flex justify-between items-center mb-4">
                         <button onclick="changeLuthierMonth(-1)" class="p-2 rounded bg-gray-50"><span class="fa-solid fa-chevron-left"></span></button>
-                        <h2 id="luthierMonthDisplay" class="text-xl font-bold tracking-wider">MES</h2>
+                        <h2 id="luthierMonthDisplay" class="text-xl font-bold tracking-wider text-gray-900">MES</h2>
                         <button onclick="changeLuthierMonth(1)" class="p-2 rounded bg-gray-50"><span class="fa-solid fa-chevron-right"></span></button>
                     </div>
                     <div id="luthierCalendarGrid" class="grid grid-cols-7 gap-1"></div>
                 </div>
                 
                 <div id="luthierAgendaListContainer" class="hidden max-w-4xl mx-auto">
-                    <h3 class="font-bold text-xl mb-4 uppercase">CITAS DEL <span id="displayLuthierDate" class="text-gray-600"></span></h3>
-                    <div class="bg-white rounded-lg shadow-sm border overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead class="bg-gray-900 text-white text-xs">
-                                <tr><th class="p-4">HORA</th><th class="p-4">CLIENTE</th><th class="p-4">ESTADO</th><th class="p-4 text-center">ACCIÓN</th></tr>
+                    <div class="flex justify-between items-center mb-4 bg-white p-4 rounded shadow-sm border">
+                        <h3 class="font-bold text-lg uppercase">FECHA: <span id="displayLuthierDate" class="text-gray-600"></span></h3>
+                        <div class="flex gap-2">
+                            <button onclick="toggleFullDay('BLOQUEAR')" class="bg-gray-800 text-white px-3 py-2 rounded text-[10px] font-bold">BLOQUEAR DÍA</button>
+                            <button onclick="toggleFullDay('LIBERAR')" class="bg-white border text-gray-800 px-3 py-2 rounded text-[10px] font-bold">LIBERAR DÍA</button>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-900 text-white text-[10px] uppercase tracking-widest">
+                                <tr><th class="p-4">HORA</th><th class="p-4">CLIENTE / ESTADO</th><th class="p-4 text-center">GESTIÓN</th></tr>
                             </thead>
                             <tbody id="agendaTableBody"></tbody>
                         </table>
@@ -142,39 +150,31 @@
                 </div>
             </div>
 
-            <div id="panel-clientes" class="hidden">
-                <h2 class="font-bold text-2xl mb-5 uppercase border-b-2 border-gray-900 inline-block">CLIENTES</h2>
-                <div id="clientesContainer" class="space-y-4"></div>
-            </div>
-
+            <div id="panel-clientes" class="hidden"><div id="clientesContainer" class="space-y-4"></div></div>
             <div id="panel-reparaciones" class="hidden">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="font-bold text-2xl uppercase border-b-2 border-gray-900">TRABAJOS ACTIVOS</h2>
-                    <button onclick="openNewTicketModal()" class="bg-gray-900 text-white px-5 py-3 rounded font-bold shadow text-sm">NUEVO TICKET</button>
-                </div>
+                <button onclick="openNewTicketModal()" class="bg-gray-900 text-white w-full py-4 rounded font-bold mb-6 shadow-md">NUEVO TICKET DE TRABAJO</button>
                 <div id="activeJobsContainer" class="space-y-4"></div>
             </div>
         </div>
     </section>
 
     <div id="modalNewTicket" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl w-full max-w-lg overflow-hidden">
+        <div class="bg-white rounded-xl w-full max-w-lg overflow-hidden shadow-2xl">
             <div class="bg-gray-900 text-white p-5 font-bold flex justify-between">
-                <span>NUEVO TICKET</span>
+                <span class="tracking-widest">REGISTRAR TRABAJO</span>
                 <button onclick="closeNewTicketModal()"><span class="fa-solid fa-times"></span></button>
             </div>
             <form id="newTicketForm" class="p-6 space-y-4">
-                <input name="cliente" placeholder="NOMBRE CLIENTE" class="w-full p-3 border rounded font-medium" required>
-                <input name="instrumento" placeholder="INSTRUMENTO" class="w-full p-3 border rounded font-medium" required>
-                <input name="serie" placeholder="SERIE" class="w-full p-3 border rounded font-medium" required>
-                <textarea name="diagnostico" placeholder="DIAGNÓSTICO" class="w-full p-3 border rounded font-medium" rows="3"></textarea>
-                <button type="submit" class="w-full bg-gray-900 text-white font-bold py-3.5 rounded shadow">CREAR ORDEN</button>
+                <input name="cliente" placeholder="NOMBRE DEL CLIENTE" class="w-full p-4 border rounded font-medium uppercase-input" required>
+                <input name="instrumento" placeholder="INSTRUMENTO" class="w-full p-4 border rounded font-medium uppercase-input" required>
+                <input name="serie" placeholder="NÚMERO DE SERIE" class="w-full p-4 border rounded font-medium uppercase-input" required>
+                <textarea name="diagnostico" placeholder="DETALLES O DIAGNÓSTICO" class="w-full p-4 border rounded font-medium uppercase-input" rows="3"></textarea>
+                <button type="submit" class="w-full bg-gray-900 text-white font-bold py-4 rounded shadow-xl">GUARDAR EN EL SISTEMA</button>
             </form>
         </div>
     </div>
 
     <script>
-        // --- CONFIGURACIÓN URL ---
         const API_URL = "https://script.google.com/macros/s/AKfycbwQd_ovJ7i13j2fq-jpvpdwdEXDFmMPQJIpaNxsOmmKBCwpkwtdxL71orTh0zDj-ER4/exec";
         const PUBLIC_LUTHIER_ID = "1IHJac6AYB1ehc722umxZvOQSQLz4X-zL3bn1JYsvv3k";
 
@@ -184,21 +184,18 @@
         const monthNames = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
         let isProcessing = false;
 
-        // Helpers
         function showLoader(s) { document.getElementById('loader').classList.toggle('hidden', !s); }
         async function fetchAPI(d) { const r = await fetch(API_URL, { method: "POST", body: JSON.stringify(d) }); return await r.json(); }
         function goHome() { location.reload(); }
         function logout() { localStorage.removeItem('luthierUser'); location.reload(); }
         function hideAll() { ['view-selection', 'view-client', 'view-login', 'view-dashboard'].forEach(id => document.getElementById(id).classList.add('hidden')); }
         function toggleElement(id) { document.getElementById(id).classList.toggle('hidden'); }
+        function safeEnc(str) { return encodeURIComponent(String(str || "")); }
 
-        // --- NAVEGACIÓN ---
-        function goToClientView() { hideAll(); document.getElementById('view-client').classList.remove('hidden'); loadMonth(); }
+        function goToClientView() { hideAll(); document.getElementById('view-client').classList.remove('hidden'); fetchMonthData(0, false); }
         function goToLogin() { currentUser ? goLuthierHome() : (hideAll(), document.getElementById('view-login').classList.remove('hidden')); }
-        
-        // --- CALENDARIO ---
-        async function loadMonth() { fetchMonthData(nav, false); }
-        async function changeMonth(o) { nav += o; loadMonth(); }
+
+        async function changeMonth(o) { nav += o; fetchMonthData(nav, false); }
         async function changeLuthierMonth(o) { luthierNav += o; fetchMonthData(luthierNav, true); }
 
         async function fetchMonthData(offset, isL) {
@@ -219,17 +216,18 @@
             const avail = isL ? luthierMonthAvailability : currentMonthAvailability;
 
             for(let i=0; i < firstDay + daysInMonth; i++) {
-                const square = document.createElement('div'); square.className = 'aspect-square flex flex-col items-center justify-center rounded text-sm font-bold border';
+                const square = document.createElement('div'); square.className = 'aspect-square flex flex-col items-center justify-center rounded text-sm font-bold border transition';
                 if(i >= firstDay) {
                     const day = i - firstDay + 1, dStr = `${y}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
                     const dObj = new Date(y, m-1, day);
                     square.innerText = day;
-                    if(dObj < today || dObj.getDay() === 0) { square.classList.add('bg-gray-100', 'text-gray-300', 'border-transparent'); }
-                    else {
+                    if(dObj < today || dObj.getDay() === 0) { 
+                        square.classList.add('bg-gray-100', 'text-gray-300', 'border-transparent'); 
+                    } else {
                         const s = avail[dStr];
-                        if(s === 'FULL') { square.classList.add('bg-red-50', 'text-red-400', 'border-red-100'); }
+                        if(s === 'FULL') { square.classList.add('bg-red-50', 'text-red-400', 'border-red-100'); if(isL) square.onclick = () => selectLuthierDate(dStr); }
                         else { 
-                            square.classList.add('cursor-pointer', 'border-green-200', 'bg-white');
+                            square.classList.add('cursor-pointer', 'border-green-200', 'bg-white', 'hover:bg-green-50');
                             square.onclick = () => isL ? selectLuthierDate(dStr) : selectCalendarDate(dStr);
                         }
                     }
@@ -238,36 +236,42 @@
             }
         }
 
-        // --- CLIENTE RESERVA ---
-        function selectCalendarDate(d) { clickedDate = d; loadSlots(d); }
-        async function loadSlots(d) {
+        // --- LÓGICA CLIENTE ---
+        async function selectCalendarDate(d) { 
+            clickedDate = d; 
             showLoader(true);
             const res = await fetchAPI({ action: "getAvailableSlots", sheetId: PUBLIC_LUTHIER_ID, date: d });
             const grid = document.getElementById('slotsGrid'); grid.innerHTML = '';
             document.getElementById('slotsContainer').classList.remove('hidden');
+            document.getElementById('clientForm').classList.add('hidden');
+            
             res.slots.forEach(s => {
                 const div = document.createElement('div');
-                div.className = `slot-card ${s.status === 'DISPONIBLE' ? 'slot-available' : 'bg-gray-100 text-gray-400'}`;
-                div.innerHTML = `<span class="text-lg font-bold">${s.time}</span>`;
+                div.className = `slot-card ${s.status === 'DISPONIBLE' ? 'slot-available' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`;
+                div.innerHTML = `<span class="text-lg font-bold">${s.time}</span><span class="text-[9px] uppercase">${s.status}</span>`;
                 if(s.status === 'DISPONIBLE') div.onclick = () => {
+                    document.querySelectorAll('.slot-card').forEach(c => c.classList.remove('slot-selected'));
+                    div.classList.add('slot-selected');
                     document.getElementById('selectedTime').value = s.time;
                     document.getElementById('displayTime').innerText = s.time;
                     document.getElementById('clientForm').classList.remove('hidden');
+                    document.getElementById('clientForm').scrollIntoView({ behavior: 'smooth' });
                 };
                 grid.appendChild(div);
             });
             showLoader(false);
+            document.getElementById('slotsContainer').scrollIntoView({ behavior: 'smooth' });
         }
 
         async function submitBooking() {
             const n = document.getElementById('clientName').value, p = document.getElementById('clientPhone').value, t = document.getElementById('selectedTime').value;
-            if(!n || !p) return;
+            if(!n || !p) return Swal.fire('AVISO', 'Completa tus datos', 'warning');
             showLoader(true);
             await fetchAPI({ action: "bookAppointment", sheetId: PUBLIC_LUTHIER_ID, bookingData: { fecha: clickedDate, hora: t, cliente: n, telefono: p } });
-            Swal.fire('¡ENVIADO!', 'El luthier confirmará pronto.', 'success').then(() => location.reload());
+            Swal.fire('¡ÉXITO!', 'Solicitud enviada correctamente.', 'success').then(() => location.reload());
         }
 
-        // --- DASHBOARD LUTHIER ---
+        // --- LÓGICA LUTHIER ---
         function goLuthierHome() {
             hideAll(); document.getElementById('view-dashboard').classList.remove('hidden');
             ['panel-agenda', 'panel-clientes', 'panel-reparaciones'].forEach(p => document.getElementById(p).classList.add('hidden'));
@@ -285,7 +289,7 @@
         }
 
         function selectLuthierDate(d) { luthierClickedDate = d; document.getElementById('displayLuthierDate').innerText = d; loadLuthierAgenda(d); }
-        
+
         async function loadLuthierAgenda(d) {
             showLoader(true);
             const res = await fetchAPI({ action: "getAgendaForDate", sheetId: currentUser.sheetId, date: d });
@@ -293,51 +297,64 @@
             document.getElementById('luthierAgendaListContainer').classList.remove('hidden');
             
             res.data.forEach(c => {
-                // Limpieza y validación de estado para asegurar que los botones aparezcan
                 const status = String(c.estado || "").toUpperCase().trim();
-                const isPending = (status === 'PENDIENTE');
-                const isLibre = (status === 'LIBRE');
-                
                 let actionHTML = '';
-                if(isPending) {
-                    // Botones forzados si el estado es PENDIENTE
-                    actionHTML = `
-                        <div class="flex justify-center gap-2">
-                            <button onclick="confirmCita('${c.id}', '${encodeURIComponent(c.cliente)}', '${c.fecha}', '${c.hora}', '${c.telefono}')" class="bg-green-600 text-white px-3 py-1.5 rounded text-xs font-bold">CONFIRMAR</button>
-                            <button onclick="rejectCita('${c.id}')" class="bg-red-500 text-white px-3 py-1.5 rounded text-xs font-bold">RECHAZAR</button>
-                        </div>`;
-                } else if (!isLibre) {
-                    actionHTML = `<a href="https://wa.me/${String(c.telefono).replace(/\D/g,'')}" target="_blank" class="bg-gray-800 text-white px-3 py-1.5 rounded text-xs font-bold inline-block">CONTACTAR</a>`;
+                
+                if(status === 'PENDIENTE') {
+                    actionHTML = `<div class="flex flex-col gap-1">
+                        <button onclick="confirmCita('${c.id}', '${safeEnc(c.cliente)}', '${c.fecha}', '${c.hora}', '${c.telefono}')" class="bg-green-600 text-white p-2 rounded text-[9px] font-bold uppercase">CONFIRMAR</button>
+                        <button onclick="rejectCita('${c.id}')" class="bg-red-500 text-white p-2 rounded text-[9px] font-bold uppercase">RECHAZAR</button>
+                    </div>`;
+                } else if(status === 'LIBRE') {
+                    actionHTML = `<button onclick="toggleSlot('${c.hora}', 'BLOQUEAR')" class="bg-gray-800 text-white p-2 rounded text-[9px] font-bold uppercase w-full">BLOQUEAR</button>`;
+                } else if(status === 'BLOQUEADO') {
+                    actionHTML = `<button onclick="toggleSlot('${c.hora}', 'LIBERAR')" class="bg-white border p-2 rounded text-[9px] font-bold uppercase w-full">LIBERAR</button>`;
+                } else {
+                    actionHTML = `<a href="https://wa.me/${String(c.telefono).replace(/\D/g,'')}" target="_blank" class="bg-blue-600 text-white p-2 rounded text-[9px] font-bold uppercase block text-center">WHATSAPP</a>`;
                 }
 
-                tbody.innerHTML += `
-                    <tr class="border-b ${isPending ? 'bg-yellow-50' : ''}">
-                        <td class="p-4 font-bold">${c.hora}</td>
-                        <td class="p-4 font-medium uppercase text-sm">${c.cliente || '-'}</td>
-                        <td class="p-4"><span class="px-2 py-1 rounded text-[10px] font-bold ${isPending ? 'bg-yellow-200 text-yellow-800' : 'bg-green-100 text-green-700'}">${status}</span></td>
-                        <td class="p-4 text-center">${actionHTML}</td>
-                    </tr>`;
+                tbody.innerHTML += `<tr class="border-b ${status === 'PENDIENTE' ? 'bg-yellow-50' : ''}">
+                    <td class="p-4 font-bold text-sm">${c.hora}</td>
+                    <td class="p-4"><p class="font-bold text-xs uppercase">${c.cliente || '-'}</p><p class="text-[9px] text-gray-400 font-bold">${status}</p></td>
+                    <td class="p-4">${actionHTML}</td>
+                </tr>`;
             });
             showLoader(false);
+            document.getElementById('luthierAgendaListContainer').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function toggleSlot(h, a) {
+            showLoader(true);
+            await fetchAPI({ action: "toggleBlockSlot", sheetId: currentUser.sheetId, date: luthierClickedDate, time: h, blockAction: a });
+            loadLuthierAgenda(luthierClickedDate);
+            fetchMonthData(luthierNav, true);
+        }
+
+        async function toggleFullDay(a) {
+            const { value } = await Swal.fire({ title: `¿${a} DÍA?`, icon: 'question', showCancelButton: true });
+            if(value) {
+                showLoader(true);
+                await fetchAPI({ action: "toggleFullDayBlock", sheetId: currentUser.sheetId, date: luthierClickedDate, blockAction: a });
+                loadLuthierAgenda(luthierClickedDate);
+                fetchMonthData(luthierNav, true);
+            }
         }
 
         async function confirmCita(id, cEnc, f, h, tel) {
             const cliente = decodeURIComponent(cEnc);
-            const { value } = await Swal.fire({ title: '¿CONFIRMAR CITA?', text: `Cita con ${cliente} a las ${h}`, icon: 'question', showCancelButton: true });
+            const { value } = await Swal.fire({ title: '¿CONFIRMAR CITA?', text: `${cliente} - ${h}`, icon: 'question', showCancelButton: true });
             if(value) {
                 showLoader(true);
-                const res = await fetchAPI({ action: "confirmAppointment", sheetId: currentUser.sheetId, citaId: id, status: 'CONFIRMADA' });
-                if(res.status === 'success') {
-                    const msg = `HOLA ${cliente}, TU CITA PARA EL DÍA ${f} A LAS ${h} HA SIDO CONFIRMADA.`;
-                    window.open(`https://wa.me/${String(tel).replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
-                    loadLuthierAgenda(luthierClickedDate);
-                }
+                await fetchAPI({ action: "confirmAppointment", sheetId: currentUser.sheetId, citaId: id, status: 'CONFIRMADA' });
+                const msg = `HOLA ${cliente}, TU RESERVA PARA EL DÍA ${f} A LAS ${h} HA SIDO CONFIRMADA.`;
+                window.open(`https://wa.me/${String(tel).replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
+                loadLuthierAgenda(luthierClickedDate);
                 showLoader(false);
             }
         }
 
         async function rejectCita(id) {
-            const { value } = await Swal.fire({ title: '¿RECHAZAR CITA?', text: 'Se liberará el espacio en la agenda.', icon: 'warning', showCancelButton: true });
+            const { value } = await Swal.fire({ title: '¿RECHAZAR CITA?', icon: 'warning', showCancelButton: true });
             if(value) {
                 showLoader(true);
                 await fetchAPI({ action: "confirmAppointment", sheetId: currentUser.sheetId, citaId: id, status: 'RECHAZADA' });
@@ -353,20 +370,19 @@
             const container = document.getElementById('activeJobsContainer'); container.innerHTML = '';
             res.data.forEach(j => {
                 container.innerHTML += `
-                    <div class="bg-white p-4 rounded-lg shadow-sm border flex justify-between items-center">
+                    <div class="bg-white p-5 rounded-lg shadow-sm border border-l-4 border-l-gray-900 flex justify-between items-center">
                         <div>
-                            <h4 class="font-bold uppercase">${j.cliente}</h4>
-                            <p class="text-xs text-gray-500">${j.instrumento} - ${j.serie}</p>
-                            <span class="text-[10px] bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded font-bold">${j.estado}</span>
+                            <h4 class="font-bold uppercase text-sm">${j.cliente}</h4>
+                            <p class="text-[10px] text-gray-500 font-bold uppercase">${j.instrumento} / SN: ${j.serie}</p>
                         </div>
-                        <button onclick='finishJob(${JSON.stringify(j)})' class="bg-red-600 text-white px-4 py-2 rounded font-bold text-xs">FINALIZAR</button>
+                        <button onclick='finishJob(${JSON.stringify(j)})' class="bg-red-600 text-white px-4 py-2 rounded font-bold text-[10px] uppercase shadow">FINALIZAR</button>
                     </div>`;
             });
             showLoader(false);
         }
 
         async function finishJob(j) {
-            const { value } = await Swal.fire({ title: '¿TRABAJO TERMINADO?', text: `Notificar a ${j.cliente}`, icon: 'warning', showCancelButton: true });
+            const { value } = await Swal.fire({ title: '¿TRABAJO LISTO?', text: `Se notificará a ${j.cliente}`, icon: 'success', showCancelButton: true });
             if(value) {
                 showLoader(true);
                 await fetchAPI({ action: "saveTicket", sheetId: currentUser.sheetId, ticketData: { id: j.ticketId, estado: "TERMINADO" } });
@@ -377,21 +393,19 @@
             }
         }
 
-        // --- CLIENTES ---
         async function loadClientes() {
             showLoader(true);
             const res = await fetchAPI({ action: "getClientsData", sheetId: currentUser.sheetId });
             const container = document.getElementById('clientesContainer'); container.innerHTML = '';
             res.data.forEach((c, i) => {
-                container.innerHTML += `<div class="bg-white p-4 rounded shadow font-bold uppercase cursor-pointer hover:bg-gray-50" onclick="toggleElement('c_info_${i}')">${c.cliente}</div>
+                container.innerHTML += `<div class="bg-white p-4 rounded shadow-sm border font-bold uppercase text-xs cursor-pointer hover:bg-gray-50" onclick="toggleElement('c_info_${i}')"><span class="fa-solid fa-user mr-2 text-gray-400"></span>${c.cliente}</div>
                 <div id="c_info_${i}" class="hidden p-4 bg-gray-50 border-x border-b rounded-b space-y-2">
-                    ${c.instrumentos.map(ins => `<p class="text-xs font-bold">🎸 ${ins.nombre}: ${ins.trabajos.length} trabajos</p>`).join('')}
+                    ${c.instrumentos.map(ins => `<p class="text-[10px] font-bold text-gray-600 uppercase">🎸 ${ins.nombre} (${ins.trabajos.length} REPARACIONES)</p>`).join('')}
                 </div>`;
             });
             showLoader(false);
         }
 
-        // Login & Modals
         document.getElementById('loginForm').onsubmit = async (e) => {
             e.preventDefault(); showLoader(true);
             const res = await fetchAPI({ action: "login", usuario: document.getElementById('user').value, clave: document.getElementById('pass').value });
@@ -409,7 +423,6 @@
             closeNewTicketModal(); loadReparaciones(); showLoader(false);
         };
         
-        // Carga inicial si hay sesión
         if(currentUser) goLuthierHome();
     </script>
 </body>
