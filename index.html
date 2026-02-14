@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luthier Manager v2.14</title>
+    <title>Luthier Manager v2.15</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,7 +36,7 @@
     <section id="view-selection" class="min-h-screen flex flex-col items-center justify-center p-4 bg-gray-100">
         <div class="text-center mb-10">
             <h1 class="text-4xl md:text-5xl font-bold tracking-wider mb-2 text-gray-900">LUTHIER MANAGER</h1>
-            <span class="bg-gray-900 text-white px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider shadow-sm">v2.14</span>
+            <span class="bg-gray-900 text-white px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider shadow-sm">v2.15</span>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
             <div onclick="goToClientView()" class="btn-tile bg-white border-b-4 border-gray-900 text-gray-900">
@@ -83,18 +83,6 @@
                     <button onclick="submitBooking()" class="w-full bg-gray-900 text-white font-bold py-4 rounded shadow-lg hover:bg-gray-800 transition">ENVIAR SOLICITUD DE RESERVA</button>
                 </div>
             </div>
-        </div>
-    </section>
-
-    <section id="view-login" class="min-h-screen flex items-center justify-center bg-gray-900 p-4 hidden">
-        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-sm">
-            <h1 class="text-2xl font-bold text-center mb-6 uppercase tracking-widest">ACCESO PANEL</h1>
-            <form id="loginForm" class="space-y-5">
-                <input type="text" id="user" placeholder="USUARIO" class="w-full p-3 border rounded font-medium" required>
-                <input type="password" id="pass" placeholder="CONTRASEÑA" class="w-full p-3 border rounded font-medium" required>
-                <button type="submit" class="w-full bg-gray-900 text-white font-bold py-3.5 rounded shadow">INGRESAR AL SISTEMA</button>
-                <button type="button" onclick="goHome()" class="w-full text-gray-500 font-bold mt-2 text-sm">REGRESAR</button>
-            </form>
         </div>
     </section>
 
@@ -158,23 +146,20 @@
         </div>
     </section>
 
-    <div id="modalNewTicket" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl w-full max-w-lg overflow-hidden shadow-2xl">
-            <div class="bg-gray-900 text-white p-5 font-bold flex justify-between">
-                <span class="tracking-widest">REGISTRAR TRABAJO</span>
-                <button onclick="closeNewTicketModal()"><span class="fa-solid fa-times"></span></button>
-            </div>
-            <form id="newTicketForm" class="p-6 space-y-4">
-                <input name="cliente" placeholder="NOMBRE DEL CLIENTE" class="w-full p-4 border rounded font-medium uppercase-input" required>
-                <input name="instrumento" placeholder="INSTRUMENTO" class="w-full p-4 border rounded font-medium uppercase-input" required>
-                <input name="serie" placeholder="NÚMERO DE SERIE" class="w-full p-4 border rounded font-medium uppercase-input" required>
-                <textarea name="diagnostico" placeholder="DETALLES O DIAGNÓSTICO" class="w-full p-4 border rounded font-medium uppercase-input" rows="3"></textarea>
-                <button type="submit" class="w-full bg-gray-900 text-white font-bold py-4 rounded shadow-xl">GUARDAR EN EL SISTEMA</button>
+    <section id="view-login" class="min-h-screen flex items-center justify-center bg-gray-900 p-4 hidden">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-sm">
+            <h1 class="text-2xl font-bold text-center mb-6 uppercase tracking-widest">ACCESO PANEL</h1>
+            <form id="loginForm" class="space-y-5">
+                <input type="text" id="user" placeholder="USUARIO" class="w-full p-3 border rounded font-medium" required>
+                <input type="password" id="pass" placeholder="CONTRASEÑA" class="w-full p-3 border rounded font-medium" required>
+                <button type="submit" class="w-full bg-gray-900 text-white font-bold py-3.5 rounded shadow">INGRESAR AL SISTEMA</button>
+                <button type="button" onclick="goHome()" class="w-full text-gray-500 font-bold mt-2 text-sm">REGRESAR</button>
             </form>
         </div>
-    </div>
+    </section>
 
     <script>
+        // --- CONFIGURACIÓN URL ---
         const API_URL = "https://script.google.com/macros/s/AKfycbwQd_ovJ7i13j2fq-jpvpdwdEXDFmMPQJIpaNxsOmmKBCwpkwtdxL71orTh0zDj-ER4/exec";
         const PUBLIC_LUTHIER_ID = "1IHJac6AYB1ehc722umxZvOQSQLz4X-zL3bn1JYsvv3k";
 
@@ -236,15 +221,13 @@
             }
         }
 
-        // --- LÓGICA CLIENTE ---
+        // --- CLIENTE ---
         async function selectCalendarDate(d) { 
-            clickedDate = d; 
-            showLoader(true);
+            clickedDate = d; showLoader(true);
             const res = await fetchAPI({ action: "getAvailableSlots", sheetId: PUBLIC_LUTHIER_ID, date: d });
             const grid = document.getElementById('slotsGrid'); grid.innerHTML = '';
             document.getElementById('slotsContainer').classList.remove('hidden');
             document.getElementById('clientForm').classList.add('hidden');
-            
             res.slots.forEach(s => {
                 const div = document.createElement('div');
                 div.className = `slot-card ${s.status === 'DISPONIBLE' ? 'slot-available' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`;
@@ -271,7 +254,7 @@
             Swal.fire('¡ÉXITO!', 'Solicitud enviada correctamente.', 'success').then(() => location.reload());
         }
 
-        // --- LÓGICA LUTHIER ---
+        // --- LUTHIER ---
         function goLuthierHome() {
             hideAll(); document.getElementById('view-dashboard').classList.remove('hidden');
             ['panel-agenda', 'panel-clientes', 'panel-reparaciones'].forEach(p => document.getElementById(p).classList.add('hidden'));
@@ -305,22 +288,47 @@
                         <button onclick="confirmCita('${c.id}', '${safeEnc(c.cliente)}', '${c.fecha}', '${c.hora}', '${c.telefono}')" class="bg-green-600 text-white p-2 rounded text-[9px] font-bold uppercase">CONFIRMAR</button>
                         <button onclick="rejectCita('${c.id}')" class="bg-red-500 text-white p-2 rounded text-[9px] font-bold uppercase">RECHAZAR</button>
                     </div>`;
+                } else if(status === 'CONFIRMADA') {
+                    actionHTML = `<div class="flex flex-col gap-1">
+                        <a href="https://wa.me/${String(c.telefono).replace(/\D/g,'')}" target="_blank" class="bg-blue-600 text-white p-2 rounded text-[9px] font-bold uppercase block text-center">CHAT</a>
+                        <button onclick="promptReleaseConfirmed('${c.id}', '${safeEnc(c.cliente)}', '${c.fecha}', '${c.hora}', '${c.telefono}')" class="bg-red-500 text-white p-2 rounded text-[9px] font-bold uppercase w-full">LIBERAR CITA</button>
+                    </div>`;
                 } else if(status === 'LIBRE') {
                     actionHTML = `<button onclick="toggleSlot('${c.hora}', 'BLOQUEAR')" class="bg-gray-800 text-white p-2 rounded text-[9px] font-bold uppercase w-full">BLOQUEAR</button>`;
                 } else if(status === 'BLOQUEADO') {
                     actionHTML = `<button onclick="toggleSlot('${c.hora}', 'LIBERAR')" class="bg-white border p-2 rounded text-[9px] font-bold uppercase w-full">LIBERAR</button>`;
                 } else {
-                    actionHTML = `<a href="https://wa.me/${String(c.telefono).replace(/\D/g,'')}" target="_blank" class="bg-blue-600 text-white p-2 rounded text-[9px] font-bold uppercase block text-center">WHATSAPP</a>`;
+                    actionHTML = `<span class="text-[8px] font-bold text-gray-400 uppercase">${status}</span>`;
                 }
 
                 tbody.innerHTML += `<tr class="border-b ${status === 'PENDIENTE' ? 'bg-yellow-50' : ''}">
                     <td class="p-4 font-bold text-sm">${c.hora}</td>
                     <td class="p-4"><p class="font-bold text-xs uppercase">${c.cliente || '-'}</p><p class="text-[9px] text-gray-400 font-bold">${status}</p></td>
-                    <td class="p-4">${actionHTML}</td>
+                    <td class="p-4 text-center">${actionHTML}</td>
                 </tr>`;
             });
             showLoader(false);
             document.getElementById('luthierAgendaListContainer').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function promptReleaseConfirmed(id, cEnc, f, h, tel) {
+            const cliente = decodeURIComponent(cEnc);
+            const { value } = await Swal.fire({ 
+                title: '¿LIBERAR CITA?', 
+                text: `Se cancelará la cita de ${cliente}. ¿Deseas abrir WhatsApp para avisarle?`, 
+                icon: 'warning', 
+                showCancelButton: true,
+                confirmButtonText: 'SÍ, LIBERAR Y AVISAR',
+                cancelButtonText: 'CANCELAR'
+            });
+            if(value) {
+                showLoader(true);
+                await fetchAPI({ action: "confirmAppointment", sheetId: currentUser.sheetId, citaId: id, status: 'CANCELADA' });
+                const msg = `HOLA ${cliente}, LAMENTO INFORMARTE QUE DEBEMOS CANCELAR TU CITA DEL DÍA ${f} A LAS ${h}. POR FAVOR, ESCRÍBENOS PARA REAGENDAR.`;
+                window.open(`https://wa.me/${String(tel).replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
+                loadLuthierAgenda(luthierClickedDate);
+                showLoader(false);
+            }
         }
 
         async function toggleSlot(h, a) {
@@ -342,7 +350,7 @@
 
         async function confirmCita(id, cEnc, f, h, tel) {
             const cliente = decodeURIComponent(cEnc);
-            const { value } = await Swal.fire({ title: '¿CONFIRMAR CITA?', text: `${cliente} - ${h}`, icon: 'question', showCancelButton: true });
+            const { value } = await Swal.fire({ title: '¿CONFIRMAR?', text: `${cliente} - ${h}`, icon: 'question', showCancelButton: true });
             if(value) {
                 showLoader(true);
                 await fetchAPI({ action: "confirmAppointment", sheetId: currentUser.sheetId, citaId: id, status: 'CONFIRMADA' });
@@ -354,7 +362,7 @@
         }
 
         async function rejectCita(id) {
-            const { value } = await Swal.fire({ title: '¿RECHAZAR CITA?', icon: 'warning', showCancelButton: true });
+            const { value } = await Swal.fire({ title: '¿RECHAZAR?', icon: 'warning', showCancelButton: true });
             if(value) {
                 showLoader(true);
                 await fetchAPI({ action: "confirmAppointment", sheetId: currentUser.sheetId, citaId: id, status: 'RECHAZADA' });
@@ -382,7 +390,7 @@
         }
 
         async function finishJob(j) {
-            const { value } = await Swal.fire({ title: '¿TRABAJO LISTO?', text: `Se notificará a ${j.cliente}`, icon: 'success', showCancelButton: true });
+            const { value } = await Swal.fire({ title: '¿LISTO?', icon: 'success', showCancelButton: true });
             if(value) {
                 showLoader(true);
                 await fetchAPI({ action: "saveTicket", sheetId: currentUser.sheetId, ticketData: { id: j.ticketId, estado: "TERMINADO" } });
@@ -400,7 +408,7 @@
             res.data.forEach((c, i) => {
                 container.innerHTML += `<div class="bg-white p-4 rounded shadow-sm border font-bold uppercase text-xs cursor-pointer hover:bg-gray-50" onclick="toggleElement('c_info_${i}')"><span class="fa-solid fa-user mr-2 text-gray-400"></span>${c.cliente}</div>
                 <div id="c_info_${i}" class="hidden p-4 bg-gray-50 border-x border-b rounded-b space-y-2">
-                    ${c.instrumentos.map(ins => `<p class="text-[10px] font-bold text-gray-600 uppercase">🎸 ${ins.nombre} (${ins.trabajos.length} REPARACIONES)</p>`).join('')}
+                    ${c.instrumentos.map(ins => `<p class="text-[10px] font-bold text-gray-600 uppercase">🎸 ${ins.nombre} (${ins.trabajos.length} TRABAJOS)</p>`).join('')}
                 </div>`;
             });
             showLoader(false);
